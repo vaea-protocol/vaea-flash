@@ -66,3 +66,8 @@ yarn-error.log*
 coverage/
 AGENTS.md
 CLAUDE.md
+frontend/web/public/file.svg
+frontend/web/public/globe.svg
+frontend/web/public/next.svg
+frontend/web/public/vercel.svg
+frontend/web/public/window.svg

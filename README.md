@@ -200,7 +200,7 @@ vaea-flash/
 └── LICENSE                # BSL-1.1
 ```
 
-> **Note:** The on-chain program and backend service are maintained in a [separate private repository](https://github.com/vaeaprotocol/vaea-core) for security.
+> **Note:** The on-chain program and backend service are maintained in a [separate private repository](https://github.com/vaea-protocol/vaea-core) for security.
 
 ---
 
