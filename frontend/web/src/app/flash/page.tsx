@@ -2,9 +2,10 @@
 import { useState, useEffect, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import TokenIcon from '@/components/TokenIcon';
 import Navbar from '@/components/layout/Navbar';
 import type { TokenCapacity } from '@/lib/api';
-import { SUPPORTED_TOKENS, formatAmount, formatPct } from '@/lib/constants';
+import { SUPPORTED_TOKENS, formatAmount, formatPct, formatUsd } from '@/lib/constants';
 import { API_URL } from '@/lib/api';
 
 const HeroScene = dynamic(() => import('@/components/three/HeroOrb'), { ssr: false });
@@ -22,14 +23,33 @@ const FALLBACK_TOKENS: TokenCapacity[] = SUPPORTED_TOKENS.map(t => ({
   status: 'available' as const, updated_at: Date.now()/1000,
 }));
 
-const FEATURED = ['SOL', 'USDC', 'JitoSOL', 'mSOL', 'cbBTC'];
+const FEATURED = ['SOL', 'USDC', 'TRUMP', 'JitoSOL', 'cbBTC'];
+
+// CoinGecko IDs for free price API (no key needed)
+const COINGECKO_MAP: Record<string, string> = {
+  SOL: 'solana', USDC: 'usd-coin', USDT: 'tether',
+  JitoSOL: 'jito-staked-sol', JupSOL: 'jupSOL',
+  JUP: 'jupiter-exchange-solana', JLP: 'jupiter-perpetuals-liquidity-provider-token',
+  cbBTC: 'coinbase-wrapped-btc', mSOL: 'msol', bSOL: 'blazestake-staked-sol',
+  INF: 'infinity-by-sanctum', laineSOL: 'lainesol',
+  TRUMP: 'official-trump', VIRTUAL: 'virtual-protocol',
+  PENGU: 'pudgy-penguins', BONK: 'bonk',
+  WIF: 'dogwifhat', RAY: 'raydium',
+  HNT: 'helium', RNDR: 'render-token',
+  JITO: 'jito-governance-token', KMNO: 'kamino',
+  PYUSD: 'paypal-usd', USDS: 'usds',
+  USD1: 'usd1', USDG: 'usdg',
+  EURC: 'euro-coin',
+};
 
 export default function FlashDashboard() {
   const [tokens, setTokens] = useState<TokenCapacity[]>(FALLBACK_TOKENS);
+  const [prices, setPrices] = useState<Record<string, number>>({});
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<'symbol' | 'fee' | 'capacity'>('symbol');
   const [filter, setFilter] = useState<'all' | 'direct' | 'synthetic'>('all');
 
+  // Fetch capacity data from our API
   useEffect(() => {
     const load = async () => {
       try {
@@ -38,7 +58,28 @@ export default function FlashDashboard() {
       } catch {}
     };
     load();
-    const iv = setInterval(load, 5000);
+    const iv = setInterval(load, 10_000);
+    return () => clearInterval(iv);
+  }, []);
+
+  // Fetch USD prices from CoinGecko (free, no API key, 1 call every 60s)
+  useEffect(() => {
+    const loadPrices = async () => {
+      try {
+        const ids = [...new Set(Object.values(COINGECKO_MAP))].join(',');
+        const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const map: Record<string, number> = {};
+        for (const [symbol, cgId] of Object.entries(COINGECKO_MAP)) {
+          const p = data[cgId]?.usd;
+          if (p) map[symbol] = Number(p);
+        }
+        setPrices(map);
+      } catch {}
+    };
+    loadPrices();
+    const iv = setInterval(loadPrices, 60_000);
     return () => clearInterval(iv);
   }, []);
 
@@ -100,9 +141,7 @@ export default function FlashDashboard() {
               <Link key={t.symbol} href={`/flash/${t.symbol}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                 <div className="card fade-in" style={{ animationDelay: `${i * 0.06}s` }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                    <div className="token-dot" style={{ background: PALLETTE[i % PALLETTE.length] }}>
-                      {t.symbol.slice(0, 2)}
-                    </div>
+                    <TokenIcon symbol={t.symbol} size={36} index={i} />
                     <div>
                       <div style={{ fontWeight: 800, fontSize: '0.92rem' }}>{t.symbol}</div>
                       <div style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>{t.name}</div>
@@ -145,7 +184,7 @@ export default function FlashDashboard() {
                 <th style={{ cursor: 'pointer' }} onClick={() => setSortKey('capacity')}>Capacity {sortKey === 'capacity' && '↓'}</th>
                 <th style={{ cursor: 'pointer' }} onClick={() => setSortKey('fee')}>Fee {sortKey === 'fee' && '↓'}</th>
                 <th>Route</th>
-                <th>Source</th>
+                <th>Price</th>
               </tr>
             </thead>
             <tbody>
@@ -154,24 +193,36 @@ export default function FlashDashboard() {
                   <td style={{ color: 'var(--text-3)', fontWeight: 700, fontSize: '0.8rem' }}>{i + 1}</td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div className="token-dot" style={{
-                        background: t.route_type === 'direct' ? PALLETTE[i % PALLETTE.length] : `${PALLETTE[i % PALLETTE.length]}88`,
-                      }}>
-                        {t.symbol.slice(0, 2)}
-                      </div>
+                      <TokenIcon symbol={t.symbol} size={36} index={i} />
                       <div>
                         <div style={{ fontWeight: 700 }}>{t.symbol}</div>
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>{t.name}</div>
                       </div>
                     </div>
                   </td>
-                  <td style={{ fontWeight: 700 }}>{t.max_amount > 0 ? formatAmount(t.max_amount) : '—'}</td>
+                  <td>
+                    <div style={{ fontWeight: 700 }}>{t.max_amount > 0 ? formatAmount(t.max_amount) : '—'}</div>
+                    {t.max_amount > 0 && prices[t.symbol] ? (
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginTop: 2 }}>
+                        {formatUsd(t.max_amount * prices[t.symbol])}
+                      </div>
+                    ) : null}
+                  </td>
                   <td><span className="tag tag-emerald">{formatPct(t.fee_sdk.total_pct)}</span></td>
                   <td>
                     <span className={`tag ${t.route_type === 'direct' ? 'tag-emerald' : 'tag-purple'}`}>{t.route_type}</span>
                   </td>
-                  <td style={{ color: 'var(--text-2)', fontSize: '0.82rem' }}>
-                    {t.source_protocol}{t.swap_protocol && <span style={{ color: 'var(--text-3)' }}> → {t.swap_protocol}</span>}
+                  <td style={{ fontWeight: 600, fontSize: '0.88rem' }}>
+                    {prices[t.symbol]
+                      ? prices[t.symbol] >= 1000
+                        ? `$${prices[t.symbol].toLocaleString('en-US', { maximumFractionDigits: 0 })}`
+                        : prices[t.symbol] >= 1
+                          ? `$${prices[t.symbol].toFixed(2)}`
+                          : prices[t.symbol] >= 0.01
+                            ? `$${prices[t.symbol].toFixed(4)}`
+                            : `$${prices[t.symbol].toFixed(8)}`
+                      : <span style={{ color: 'var(--text-3)' }}>—</span>
+                    }
                   </td>
                 </tr>
               ))}
@@ -185,8 +236,12 @@ export default function FlashDashboard() {
         <div className="mx" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ color: 'var(--text-3)', fontSize: '0.78rem', fontWeight: 500 }}>© 2026 VAEA Protocol</span>
           <div style={{ display: 'flex', gap: 20 }}>
-            {['Docs', 'GitHub', 'Twitter'].map(l => (
-              <a key={l} href={l === 'Docs' ? '/flash/docs' : '#'} style={{ color: 'var(--text-3)', fontSize: '0.78rem', textDecoration: 'none', fontWeight: 500 }}>{l}</a>
+            {[
+              { label: 'Docs', href: '/flash/docs' },
+              { label: 'Tools', href: '/flash/tools' },
+              { label: 'GitHub', href: 'https://github.com/vaea-protocol/vaea-flash' },
+            ].map(l => (
+              <a key={l.label} href={l.href} style={{ color: 'var(--text-3)', fontSize: '0.78rem', textDecoration: 'none', fontWeight: 500 }}>{l.label}</a>
             ))}
           </div>
         </div>

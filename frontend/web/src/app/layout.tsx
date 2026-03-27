@@ -45,15 +45,7 @@ export const metadata: Metadata = {
       },
     ],
   },
-  twitter: {
-    card: "summary_large_image",
-    site: "@vaboratory",
-    creator: "@vaboratory",
-    title: "VAEA Flash — Universal Flash Loans on Solana",
-    description:
-      "Flash loan any SPL token on Solana. 21+ tokens, from 0.03% fee.",
-    images: ["/og-image.png"],
-  },
+
   robots: {
     index: true,
     follow: true,

@@ -284,3 +284,34 @@ h1, h2, h3, h4 {
 .fade-in-2 { animation-delay: 0.12s; }
 .fade-in-3 { animation-delay: 0.2s; }
 .float-slow { animation: float 7s ease-in-out infinite; }
+
+/* ═══ Token Coin 3D Flip ═══ */
+.token-coin {
+  display: inline-flex;
+  flex-shrink: 0;
+  cursor: pointer;
+  perspective: 800px;
+}
+.token-coin-inner {
+  border-radius: 50%;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.token-coin:hover .token-coin-inner {
+  transform: rotateY(360deg);
+  box-shadow:
+    0 0 0 2px rgba(41,193,162,0.3),
+    0 6px 20px rgba(41,193,162,0.18);
+}
+
+/* ═══ Tool Section Cards ═══ */
+.tool-section-card {
+  transition: box-shadow 0.35s var(--ease), transform 0.35s var(--ease) !important;
+}
+.tool-section-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}

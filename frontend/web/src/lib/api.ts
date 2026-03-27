@@ -1,4 +1,4 @@
-export const API_URL = process.env.NEXT_PUBLIC_VAEA_API_URL || 'http://localhost:8080';
+export const API_URL = process.env.NEXT_PUBLIC_VAEA_API_URL || 'https://api.vaea.fi';
 
 export interface TokenCapacity {
   symbol: string;

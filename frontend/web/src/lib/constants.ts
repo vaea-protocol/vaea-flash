@@ -11,21 +11,37 @@ export const SUPPORTED_TOKENS = [
   { symbol: 'bSOL', name: 'BlazeStake Staked SOL', decimals: 9, route: 'synthetic', icon: '🔥' },
   { symbol: 'INF', name: 'Infinity by Sanctum', decimals: 9, route: 'synthetic', icon: '∞' },
   { symbol: 'laineSOL', name: 'Laine Staked SOL', decimals: 9, route: 'synthetic', icon: 'ℓ' },
-  { symbol: 'wETH', name: 'Wrapped Ethereum', decimals: 8, route: 'synthetic', icon: 'Ξ' },
+  { symbol: 'TRUMP', name: 'Official Trump', decimals: 6, route: 'synthetic', icon: '🇺🇸' },
+  { symbol: 'VIRTUAL', name: 'Virtual Protocol', decimals: 9, route: 'synthetic', icon: '🤖' },
+  { symbol: 'PENGU', name: 'Pudgy Penguins', decimals: 6, route: 'synthetic', icon: '🐧' },
   { symbol: 'BONK', name: 'Bonk', decimals: 5, route: 'synthetic', icon: '🐕' },
   { symbol: 'WIF', name: 'dogwifhat', decimals: 6, route: 'synthetic', icon: '🎩' },
-  { symbol: 'PYTH', name: 'Pyth Network', decimals: 6, route: 'synthetic', icon: '🔮' },
   { symbol: 'RAY', name: 'Raydium', decimals: 6, route: 'synthetic', icon: '☀️' },
   { symbol: 'HNT', name: 'Helium Network Token', decimals: 8, route: 'synthetic', icon: 'ℍ' },
   { symbol: 'RNDR', name: 'Render Network', decimals: 8, route: 'synthetic', icon: '🎬' },
   { symbol: 'JITO', name: 'Jito Governance', decimals: 9, route: 'synthetic', icon: '⚡' },
   { symbol: 'KMNO', name: 'Kamino Finance', decimals: 6, route: 'synthetic', icon: 'K' },
+  { symbol: 'PYUSD', name: 'PayPal USD', decimals: 6, route: 'synthetic', icon: '💳' },
+  { symbol: 'USDS', name: 'Sky Dollar', decimals: 6, route: 'synthetic', icon: '🌤️' },
+  { symbol: 'USD1', name: 'World Liberty USD', decimals: 6, route: 'synthetic', icon: '🏛️' },
+  { symbol: 'USDG', name: 'Global Dollar', decimals: 6, route: 'synthetic', icon: '🌍' },
+  { symbol: 'EURC', name: 'Euro Coin', decimals: 6, route: 'synthetic', icon: '€' },
 ] as const;
 
 export const formatAmount = (amount: number, decimals = 2): string => {
+  if (amount >= 1_000_000_000_000) return `${(amount / 1_000_000_000_000).toFixed(decimals)}T`;
+  if (amount >= 1_000_000_000) return `${(amount / 1_000_000_000).toFixed(decimals)}B`;
   if (amount >= 1_000_000) return `${(amount / 1_000_000).toFixed(decimals)}M`;
   if (amount >= 1_000) return `${(amount / 1_000).toFixed(decimals)}K`;
   return amount.toFixed(decimals);
+};
+
+export const formatUsd = (amount: number): string => {
+  if (amount >= 1_000_000_000) return `$${(amount / 1_000_000_000).toFixed(2)}B`;
+  if (amount >= 1_000_000) return `$${(amount / 1_000_000).toFixed(2)}M`;
+  if (amount >= 1_000) return `$${(amount / 1_000).toFixed(1)}K`;
+  if (amount > 0) return `$${amount.toFixed(0)}`;
+  return '';
 };
 
 export const formatPct = (pct: number): string => {
