@@ -1,0 +1,16 @@
+{
+  "name": "vaea-flash-example-ts",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.90.0",
+    "@vaea/flash": "workspace:*"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.0"
+  }
+}

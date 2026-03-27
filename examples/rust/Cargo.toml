@@ -1,0 +1,13 @@
+[package]
+name = "vaea-flash-example"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+vaea-flash-sdk = { path = "../../sdk/rust" }
+solana-sdk = "1.18"
+solana-client = "1.18"
+tokio = { version = "1", features = ["full"] }
+bs58 = "0.5"
+dotenv = "0.15"

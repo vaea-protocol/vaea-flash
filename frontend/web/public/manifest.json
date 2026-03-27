@@ -1,0 +1,16 @@
+{
+  "name": "VAEA Flash",
+  "short_name": "VAEA",
+  "description": "Universal flash loans on Solana",
+  "start_url": "/flash",
+  "display": "standalone",
+  "background_color": "#FEF4EF",
+  "theme_color": "#FEF4EF",
+  "icons": [
+    {
+      "src": "/Logo_noire.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

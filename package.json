@@ -1,0 +1,26 @@
+{
+  "name": "vaea-flash-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "VAEA Flash Universal Flash Loans Monorepo",
+  "workspaces": [
+    "sdk/typescript",
+    "frontend/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces"
+  },
+  "devDependencies": {
+    "@coral-xyz/anchor": "^0.32.1",
+    "@solana/web3.js": "^1.98.4",
+    "@types/chai": "^5.2.3",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^25.5.0",
+    "chai": "^4.5.0",
+    "mocha": "^11.7.5",
+    "ts-mocha": "^11.1.0",
+    "typescript": "^6.0.2"
+  }
+}

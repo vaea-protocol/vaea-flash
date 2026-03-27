@@ -1,0 +1,68 @@
+# ═══ Dependencies ═══
+node_modules/
+.pnp
+.pnp.js
+
+# ═══ Build ═══
+dist/
+build/
+.next/
+out/
+target/
+**/*.rs.bk
+
+# ═══ Anchor ═══
+.anchor/
+test-ledger/
+
+# ═══ Python ═══
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+*.egg
+
+# ═══ Environment & Secrets ═══
+.env
+.env.local
+.env.production
+.env*.local
+*.pem
+keypair*.json
+
+# ═══ IDE ═══
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ═══ OS ═══
+.DS_Store
+Thumbs.db
+*.log
+
+# ═══ Private / Backend ═══
+# The backend and on-chain program are in a separate private repo.
+# If working locally with the full monorepo, these are excluded:
+backend/
+programs/
+scripts/
+tests/
+Anchor.toml
+/Cargo.toml
+/Cargo.lock
+VAEA_DEV_PROMPT.md
+VAEA_FLASH_SPEC.md
+
+# ═══ Misc ═══
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.turbo
+coverage/
+AGENTS.md
+CLAUDE.md
