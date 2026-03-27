@@ -230,12 +230,33 @@ Use `maxFeeBps` in SDK calls to auto-reject transactions exceeding your threshol
 
 ---
 
+## Performance
+
+| Metric | Value |
+|---|---|
+| **TX overhead** | **36 bytes** (4 accounts via ALT compression) |
+| **Compute Units** | ~23,000 CU (1.6% of TX budget) |
+| **Program size** | 235 KB (LTO fat, opt-level z) |
+| **API latency** | <5ms (Redis-cached, no RPC calls) |
+
+VAEA Flash ships a **pre-loaded Address Lookup Table** that compresses our 4 fixed accounts from 128 bytes down to 4 bytes. Your transactions stay lean even with complex arbitrage logic.
+
+```typescript
+import { VAEA_LOOKUP_TABLE } from '@vaea/flash';
+// DjncKSi9KqtnFx6hFYa7ARmwJ7B4Y7UH3XpR2XEuXNJr
+// Auto-used in execute() — zero config needed
+```
+
+---
+
 ## Security
 
-- The on-chain program uses **instruction introspection** to verify repayment within the same transaction
+- **Instruction introspection** verifies `begin_flash` ↔ `end_flash` pairing within the same TX
 - All transactions are **atomic** — if repayment fails, the entire transaction reverts
 - **Zero database, zero data retention** — VAEA reads on-chain state only
-- The program will be audited before mainnet launch
+- **Deployer-restricted initialization** — only the protocol deployer can init the Config PDA
+- **Fee floor protection** — minimum 1 lamport fee prevents micro-loan evasion
+- **Strict authority checks** — `require!` enforced on all admin operations
 
 ---
 
