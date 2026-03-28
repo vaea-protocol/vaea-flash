@@ -194,9 +194,79 @@ export const VAEA_PROGRAM_ID = new PublicKey('HoYiwkNB7a3gmZXEkTqLkborNDc976vKEU
 export const VAEA_LOOKUP_TABLE = new PublicKey('DjncKSi9KqtnFx6hFYa7ARmwJ7B4Y7UH3XpR2XEuXNJr');
 
 export const SUPPORTED_TOKENS = [
+  // Direct routes
   'SOL', 'USDC', 'USDT', 'JitoSOL', 'JupSOL', 'JUP', 'JLP', 'cbBTC',
-  'mSOL', 'bSOL', 'INF', 'laineSOL', 'wETH',
-  'BONK', 'WIF', 'PYTH', 'RAY', 'HNT', 'RNDR', 'JITO', 'KMNO',
+  // Synthetic routes — LSTs
+  'mSOL', 'bSOL', 'INF', 'laineSOL',
+  // Synthetic routes — Majors
+  'TRUMP', 'PENGU', 'VIRTUAL',
+  // Synthetic routes — Mid-caps
+  'BONK', 'WIF', 'RAY', 'HNT', 'RNDR', 'JITO', 'KMNO',
+  // Synthetic routes — Stablecoins
+  'PYUSD', 'USDS', 'USD1', 'USDG', 'EURC',
 ] as const;
 
+
 export type SupportedToken = typeof SUPPORTED_TOKENS[number];
+
+// ═══════════════════════════════════════════════════════════
+//  Simulate types
+// ═══════════════════════════════════════════════════════════
+
+export interface SimulateParams {
+  /** Token symbol or mint */
+  token: string | PublicKey;
+  /** Borrow amount in human units */
+  amount: number;
+  /** Your instructions to sandwich between borrow and repay */
+  instructions: TransactionInstruction[];
+  /** Max slippage in bps */
+  slippageBps?: number;
+  /** Max fee guard in bps */
+  maxFeeBps?: number;
+}
+
+export interface SimulateResult {
+  /** Whether the TX would succeed */
+  success: boolean;
+  /** Error details if simulation failed */
+  error?: string;
+  /** Exact compute units consumed */
+  computeUnits: number;
+  /** Full program logs */
+  logs: string[];
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Multi-Borrow types
+// ═══════════════════════════════════════════════════════════
+
+export interface MultiBorrowRequest {
+  /** Token symbol or mint */
+  token: string | PublicKey;
+  /** Borrow amount in human units */
+  amount: number;
+}
+
+export interface BorrowMultiParams {
+  /** Array of loans to execute atomically */
+  loans: MultiBorrowRequest[];
+  /** Your instructions to insert between all borrows and all repays */
+  onFunds: (ixs: TransactionInstruction[]) => Promise<TransactionInstruction[]> | TransactionInstruction[];
+  /** Max slippage in bps */
+  slippageBps?: number;
+  /** Max fee guard in bps */
+  maxFeeBps?: number;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Execute options
+// ═══════════════════════════════════════════════════════════
+
+export interface ExecuteOptions {
+  /** Retry configuration */
+  retry?: import('./retry').RetryConfig;
+  /** Priority fee in micro-lamports per CU (default: auto) */
+  priorityMicroLamports?: number;
+}
+

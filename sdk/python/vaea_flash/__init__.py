@@ -22,6 +22,13 @@ from .types import (
 )
 
 from .client import VaeaFlash
+from .slippage import calculate_slippage_bps, SlippageMode
+from .profitability import (
+    calculate_profitability,
+    ProfitabilityParams,
+    ProfitabilityResult,
+    ProfitabilityBreakdown,
+)
 
 __all__ = [
     "VaeaFlash",
@@ -43,4 +50,11 @@ __all__ = [
     "VAEA_API_URL",
     "VAEA_PROGRAM_ID",
     "SUPPORTED_TOKENS",
+    # Extended
+    "calculate_slippage_bps",
+    "SlippageMode",
+    "calculate_profitability",
+    "ProfitabilityParams",
+    "ProfitabilityResult",
+    "ProfitabilityBreakdown",
 ]

@@ -217,6 +217,96 @@ class VaeaFlash:
         return prefix + list(user_instructions) + suffix
 
     # ═══════════════════════════════════════════════════════════
+    #  borrow_multi() — Multi-Token Atomic Flash Loans
+    # ═══════════════════════════════════════════════════════════
+
+    async def borrow_multi(
+        self,
+        loans: List[Dict[str, Any]],
+        user_pubkey: str,
+        user_instructions: List[Instruction],
+        slippage_bps: int = 50,
+        max_fee_bps: Optional[int] = None,
+    ) -> List[Instruction]:
+        """
+        Build a multi-token atomic flash loan with nested sandwich pattern:
+          prefix_A → prefix_B → [user IXs] → suffix_B → suffix_A
+
+        Args:
+            loans: List of dicts with 'token' and 'amount' keys
+            user_pubkey: Your wallet public key (base58)
+            user_instructions: Your instructions to insert
+            slippage_bps: Max slippage in bps (default: 50)
+            max_fee_bps: Revert if total fee exceeds this
+
+        Returns:
+            List of all instructions: all prefixes + user + reversed suffixes
+        """
+        builds = []
+        for loan in loans:
+            build_response = await self.build(BuildRequest(
+                token=loan["token"],
+                amount=loan["amount"],
+                user_pubkey=user_pubkey,
+                source=self.source,
+                slippage_bps=slippage_bps,
+                max_fee_bps=max_fee_bps,
+            ))
+            builds.append(build_response)
+
+        all_ixs = []
+
+        # All prefixes in order
+        for b in builds:
+            all_ixs.extend(self._parse_instruction(ix) for ix in b.prefix_instructions)
+
+        # User instructions
+        all_ixs.extend(user_instructions)
+
+        # All suffixes in reverse order (nested sandwich)
+        for b in reversed(builds):
+            all_ixs.extend(self._parse_instruction(ix) for ix in b.suffix_instructions)
+
+        return all_ixs
+
+    # ═══════════════════════════════════════════════════════════
+    #  is_profitable() — Profitability Check
+    # ═══════════════════════════════════════════════════════════
+
+    async def is_profitable(
+        self,
+        token: str,
+        amount: float,
+        expected_revenue: float,
+        jito_tip: float = 0.0,
+        priority_fee: float = 0.0,
+    ) -> "ProfitabilityResult":
+        """
+        Check if a flash loan strategy is profitable after all fees.
+
+        Args:
+            token: Token symbol or mint
+            amount: Borrow amount in human units
+            expected_revenue: Expected gross profit from strategy in SOL
+            jito_tip: Optional Jito tip in SOL
+            priority_fee: Optional priority fee in SOL
+
+        Returns:
+            ProfitabilityResult with net_profit, breakdown, and recommendation
+        """
+        from .profitability import calculate_profitability, ProfitabilityParams
+
+        quote = await self.get_quote(token, amount)
+        params = ProfitabilityParams(
+            token=token,
+            amount=amount,
+            expected_revenue=expected_revenue,
+            jito_tip=jito_tip,
+            priority_fee=priority_fee,
+        )
+        return calculate_profitability(quote, params)
+
+    # ═══════════════════════════════════════════════════════════
     #  Helpers
     # ═══════════════════════════════════════════════════════════
 

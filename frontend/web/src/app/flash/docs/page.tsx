@@ -4,6 +4,7 @@ import Navbar from '@/components/layout/Navbar';
 import {
   SECTIONS, OVERVIEW_CONTENT, QUICKSTART, TOKENS_DIRECT, TOKENS_SYNTHETIC,
   API_ENDPOINTS, ERRORS, FAQ,
+  TURBO_MODE, SIMULATE, MULTI_FLASH, PROFITABILITY, SMART_RETRY,
 } from './content';
 
 /* ═══════════════════════════════════════════════
@@ -457,6 +458,110 @@ export default function DocsPage() {
 
             <H2>Fee Breakdown Example</H2>
             <Code code={`Borrow: 10,000 mSOL via synthetic route\n  SOL needed:          ~10,050 SOL\n  Source fee (Jupiter):  0%     =  0 SOL\n  Swap SOL → mSOL:     ~0.03% =  ~3 SOL\n  Swap mSOL → SOL:     ~0.03% =  ~3 SOL\n  VAEA fee:             0.03% =  ~3 SOL\n  ─────────────────────────────────────\n  Total cost:           ~9 SOL (~0.09%)`} />
+          </>)}
+
+          {/* ─── TURBO MODE ─── */}
+          {section === 'turbo' && (<>
+            <H1>🚀 {TURBO_MODE.title}</H1>
+            <P>{TURBO_MODE.tagline}</P>
+            <P>{TURBO_MODE.description}</P>
+
+            <H2>Latency Comparison</H2>
+            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 24, fontSize: '0.88rem' }}>
+              <thead><tr style={{ borderBottom: '2px solid var(--border)' }}>
+                <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 800, fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-3)' }}>SDK</th>
+                <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 800, fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-3)' }}>Network Calls</th>
+                <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 800, fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-3)' }}>Total Time</th>
+              </tr></thead>
+              <tbody>
+                {TURBO_MODE.comparison.map(c => (
+                  <tr key={c.sdk} style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '10px 12px', fontWeight: c.sdk.includes('Turbo') ? 800 : 500, color: c.sdk.includes('Turbo') ? '#29C1A2' : 'inherit' }}>{c.sdk}</td>
+                    <td style={{ padding: '10px 12px', fontFamily: "'SF Mono', monospace", fontSize: '0.82rem' }}>{c.calls}</td>
+                    <td style={{ padding: '10px 12px', fontWeight: 700 }}>{c.time}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <H2>Usage</H2>
+            <Code code={TURBO_MODE.code} lang="typescript" />
+
+            <Callout type="tip">Turbo Mode works <strong>offline</strong> — it doesn&apos;t depend on the VAEA API at all. Only the Solana RPC connection is needed to send the transaction.</Callout>
+          </>)}
+
+          {/* ─── SIMULATION ─── */}
+          {section === 'simulate' && (<>
+            <H1>🔬 {SIMULATE.title}</H1>
+            <P>{SIMULATE.tagline}</P>
+            <P>{SIMULATE.description}</P>
+            <Code code={SIMULATE.code} lang="typescript" />
+            <Callout type="info">Simulation uses <code>sigVerify: false</code> — you don&apos;t need to sign the transaction to simulate it.</Callout>
+          </>)}
+
+          {/* ─── MULTI-FLASH ─── */}
+          {section === 'multiflash' && (<>
+            <H1>⚡ {MULTI_FLASH.title}</H1>
+            <P>{MULTI_FLASH.tagline}</P>
+            <P>{MULTI_FLASH.description}</P>
+
+            <H2>Transaction Pattern</H2>
+            <div style={{ background: '#1a1a1a', borderRadius: 16, padding: '16px 20px', marginBottom: 20, fontFamily: "'SF Mono', monospace", fontSize: '0.82rem', color: '#e0e0e0', overflowX: 'auto' }}>
+              {MULTI_FLASH.pattern}
+            </div>
+
+            <H2>Usage</H2>
+            <Code code={MULTI_FLASH.code} lang="typescript" />
+            <Callout type="tip">Each token gets its own PDA: <code>[&quot;flash&quot;, payer, token_mint]</code>. No collision between simultaneous loans.</Callout>
+          </>)}
+
+          {/* ─── PROFITABILITY ─── */}
+          {section === 'profitability' && (<>
+            <H1>📊 {PROFITABILITY.title}</H1>
+            <P>{PROFITABILITY.tagline}</P>
+            <P>{PROFITABILITY.description}</P>
+            <Code code={PROFITABILITY.code} lang="typescript" />
+            <H3>Recommendations</H3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 20 }}>
+              {[
+                { label: 'send', desc: 'Profit > 2× costs', color: '#29C1A2', icon: '✅' },
+                { label: 'wait', desc: 'Marginal profit', color: '#FF9060', icon: '⏳' },
+                { label: 'abort', desc: 'Unprofitable', color: '#FF718F', icon: '🚫' },
+              ].map(r => (
+                <div key={r.label} style={{ background: `${r.color}08`, border: `1.5px solid ${r.color}30`, borderRadius: 16, padding: 16, textAlign: 'center' }}>
+                  <div style={{ fontSize: '1.4rem', marginBottom: 4 }}>{r.icon}</div>
+                  <div style={{ fontWeight: 800, fontSize: '0.85rem', marginBottom: 4, fontFamily: "'SF Mono', monospace" }}>{r.label}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>{r.desc}</div>
+                </div>
+              ))}
+            </div>
+          </>)}
+
+          {/* ─── SMART RETRY ─── */}
+          {section === 'retry' && (<>
+            <H1>🔄 {SMART_RETRY.title}</H1>
+            <P>{SMART_RETRY.tagline}</P>
+            <P>{SMART_RETRY.description}</P>
+            <Code code={SMART_RETRY.code} lang="typescript" />
+
+            <H2>Error Classification</H2>
+            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 24, fontSize: '0.88rem' }}>
+              <thead><tr style={{ borderBottom: '2px solid var(--border)' }}>
+                <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 800, fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-3)' }}>Error Type</th>
+                <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 800, fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-3)' }}>Action</th>
+                <th style={{ textAlign: 'center', padding: '10px 12px', fontWeight: 800, fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-3)' }}>Retried</th>
+              </tr></thead>
+              <tbody>
+                {SMART_RETRY.errorClasses.map(e => (
+                  <tr key={e.type} style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '10px 12px', fontWeight: 700 }}>{e.type}</td>
+                    <td style={{ padding: '10px 12px', color: 'var(--text-2)' }}>{e.action}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'center' }}>{e.retried ? '✅' : '❌'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <Callout type="warn">Program errors (your logic bugs) are <strong>never retried</strong>. This prevents wasting SOL on transactions that will always fail.</Callout>
           </>)}
 
           {/* ─── API REFERENCE ─── */}

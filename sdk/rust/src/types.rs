@@ -236,3 +236,41 @@ pub const SUPPORTED_TOKENS: &[&str] = &[
     "mSOL", "bSOL", "INF", "laineSOL", "wETH",
     "BONK", "WIF", "PYTH", "RAY", "HNT", "RNDR", "JITO", "KMNO",
 ];
+
+// ═══════════════════════════════════════════════════════════
+//  Extended types
+// ═══════════════════════════════════════════════════════════
+
+/// Result of a transaction simulation.
+#[derive(Debug, Clone)]
+pub struct SimulateResult {
+    /// Whether the TX would succeed
+    pub success: bool,
+    /// Error details if simulation failed
+    pub error: Option<String>,
+    /// Exact compute units consumed
+    pub compute_units: u64,
+    /// Full program logs
+    pub logs: Vec<String>,
+}
+
+/// A single loan request in a multi-borrow.
+pub struct MultiBorrowRequest {
+    /// Token symbol or mint
+    pub token: String,
+    /// Borrow amount in human units
+    pub amount: f64,
+}
+
+/// Params for multi-token atomic flash loans.
+pub struct BorrowMultiParams {
+    /// Array of loans to execute atomically
+    pub loans: Vec<MultiBorrowRequest>,
+    /// User instructions to insert between all borrows and all repays
+    pub instructions: Vec<solana_sdk::instruction::Instruction>,
+    /// Max slippage in bps
+    pub slippage_bps: Option<u16>,
+    /// Max fee guard in bps
+    pub max_fee_bps: Option<u16>,
+}
+

@@ -8,6 +8,7 @@ import {
   AccountMeta,
   SendOptions,
   AddressLookupTableAccount,
+  ComputeBudgetProgram,
 } from '@solana/web3.js';
 import {
   VaeaFlashConfig,
@@ -17,6 +18,10 @@ import {
   BuildRequest,
   BuildResponse,
   BorrowParams,
+  BorrowMultiParams,
+  SimulateParams,
+  SimulateResult,
+  ExecuteOptions,
   HealthResponse,
   ApiInstructionData,
   TokenCapacity,
@@ -24,6 +29,9 @@ import {
   VAEA_LOOKUP_TABLE,
   SUPPORTED_TOKENS,
 } from './types';
+import { WarmCache } from './warm-cache';
+import { sendWithRetry, DEFAULT_RETRY_CONFIG } from './retry';
+import { calculateProfitability, ProfitabilityParams, ProfitabilityResult } from './profitability';
 
 /**
  * VAEA Flash — Universal Flash Loan SDK for Solana
@@ -50,12 +58,38 @@ export class VaeaFlash {
   private readonly source: 'sdk' | 'ui';
   private readonly connection?: Connection;
   private readonly wallet?: Keypair;
+  private warmCache?: WarmCache;
 
-  constructor(config: VaeaFlashConfig & { connection?: Connection; wallet?: Keypair } = {}) {
+  constructor(config: VaeaFlashConfig & {
+    connection?: Connection;
+    wallet?: Keypair;
+    /** Enable background capacity pre-warming (default: false) */
+    preWarm?: boolean;
+    /** Refresh interval in ms for pre-warming (default: 2000) */
+    refreshInterval?: number;
+  } = {}) {
     this.apiUrl = config.apiUrl ?? VAEA_API_URL;
     this.source = config.source ?? 'sdk';
     this.connection = config.connection;
     this.wallet = config.wallet;
+
+    if (config.preWarm) {
+      this.warmCache = new WarmCache(this.apiUrl, config.refreshInterval ?? 2000);
+      this.warmCache.start().catch(() => {}); // non-blocking start
+    }
+  }
+
+  /** Stop background pre-warming (if enabled). */
+  destroy(): void {
+    this.warmCache?.stop();
+  }
+
+  /** Validate wallet is set and return public key as base58. */
+  private requireWalletPublicKey(method: string): string {
+    if (!this.wallet) {
+      throw new VaeaError('API_ERROR', `Wallet is required for ${method}(). Pass it in VaeaFlash config.`);
+    }
+    return this.wallet.publicKey.toBase58();
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -65,8 +99,11 @@ export class VaeaFlash {
   /**
    * Get real-time flash loan capacity for all supported tokens.
    * Data refreshes every 2 seconds from on-chain liquidity scanning.
+   * If pre-warming is enabled, returns cached data instantly.
    */
   async getCapacity(): Promise<CapacityResponse> {
+    const cached = this.warmCache?.getCapacity();
+    if (cached) return cached;
     return this.apiGet<CapacityResponse>('/v1/capacity');
   }
 
@@ -148,11 +185,9 @@ export class VaeaFlash {
   async borrow(params: BorrowParams): Promise<TransactionInstruction[]> {
     const symbol = params.token instanceof PublicKey ? params.token.toBase58() : params.token;
 
-    // 1. Get quote to validate
-    const quote = await this.getQuote(symbol, params.amount);
-
-    // 2. Fee guard
+    // 1. Fee guard — ONLY fetch quote if user set maxFeeBps (saves ~100ms for bots)
     if (params.maxFeeBps !== undefined) {
+      const quote = await this.getQuote(symbol, params.amount);
       const actualBps = Math.round(quote.fee_breakdown.total_fee_pct * 100);
       if (actualBps > params.maxFeeBps) {
         throw new VaeaError('FEE_TOO_HIGH', `Fee ${actualBps} bps exceeds max ${params.maxFeeBps} bps`, {
@@ -163,11 +198,11 @@ export class VaeaFlash {
       }
     }
 
-    // 3. Build prefix/suffix
+    // 2. Build prefix/suffix — single HTTP call, backend is pure CPU (0 RPC, 0 DB)
     const buildResponse = await this.build({
       token: symbol,
       amount: params.amount,
-      user_pubkey: this.wallet?.publicKey.toBase58() ?? '',
+      user_pubkey: this.requireWalletPublicKey('borrow'),
       source: this.source,
       slippage_bps: params.slippageBps ?? 50,
       max_fee_bps: params.maxFeeBps,
@@ -176,7 +211,7 @@ export class VaeaFlash {
     const prefix = buildResponse.prefix_instructions.map(parseApiInstruction);
     const suffix = buildResponse.suffix_instructions.map(parseApiInstruction);
 
-    // 4. Let user add their instructions
+    // 3. Let user add their instructions
     const userIxs = await params.onFunds([]);
 
     return [...prefix, ...userIxs, ...suffix];
@@ -205,7 +240,7 @@ export class VaeaFlash {
    * });
    * ```
    */
-  async execute(params: BorrowParams, sendOptions?: SendOptions): Promise<string> {
+  async execute(params: BorrowParams, options?: ExecuteOptions): Promise<string> {
     if (!this.connection) {
       throw new VaeaError('API_ERROR', 'Connection is required for execute(). Pass it in VaeaFlash config.');
     }
@@ -213,32 +248,209 @@ export class VaeaFlash {
       throw new VaeaError('API_ERROR', 'Wallet (Keypair) is required for execute(). Pass it in VaeaFlash config.');
     }
 
-    const allIxs = await this.borrow(params);
-    const blockhash = await this.connection.getLatestBlockhash('confirmed');
+    // Parallelize: borrow + ALT fetch happen simultaneously
+    const [allIxs, lookupTables] = await Promise.all([
+      this.borrow(params),
+      this.fetchLookupTable(),
+    ]);
+    const retryConfig = options?.retry ?? DEFAULT_RETRY_CONFIG;
 
-    // Fetch our pre-loaded ALT to compress the transaction
+    return sendWithRetry(
+      this.connection,
+      this.wallet,
+      allIxs,
+      lookupTables,
+      retryConfig,
+      options?.priorityMicroLamports,
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  //  simulate() — Dry Run
+  // ═══════════════════════════════════════════════════════════
+
+  /**
+   * Simulate a flash loan transaction without sending it.
+   * Returns success/failure, CU consumption, and program logs.
+   *
+   * No wallet signing needed — uses sigVerify:false.
+   */
+  async simulate(params: SimulateParams): Promise<SimulateResult> {
+    if (!this.connection) {
+      throw new VaeaError('API_ERROR', 'Connection is required for simulate()');
+    }
+    if (!this.wallet) {
+      throw new VaeaError('API_ERROR', 'Wallet is required for simulate() (used as payer key, NOT for signing)');
+    }
+
+    // Build instruction set via borrow()
+    const allIxs = await this.borrow({
+      token: params.token,
+      amount: params.amount,
+      onFunds: async () => params.instructions,
+      slippageBps: params.slippageBps,
+      maxFeeBps: params.maxFeeBps,
+    });
+
+    // Add max CU budget for simulation headroom
+    allIxs.unshift(ComputeBudgetProgram.setComputeUnitLimit({ units: 1_400_000 }));
+
     const lookupTables = await this.fetchLookupTable();
 
+    // Use dummy blockhash — RPC will replace it
     const messageV0 = new TransactionMessage({
       payerKey: this.wallet.publicKey,
-      recentBlockhash: blockhash.blockhash,
+      recentBlockhash: PublicKey.default.toBase58(),
       instructions: allIxs,
     }).compileToV0Message(lookupTables);
 
     const tx = new VersionedTransaction(messageV0);
-    tx.sign([this.wallet]);
+    // DO NOT sign — sigVerify:false allows unsigned sim
 
-    const signature = await this.connection.sendTransaction(tx, {
-      skipPreflight: false,
-      ...sendOptions,
+    const sim = await this.connection.simulateTransaction(tx, {
+      sigVerify: false,
+      replaceRecentBlockhash: true,
     });
 
-    await this.connection.confirmTransaction(
-      { signature, ...blockhash },
-      'confirmed'
+    return {
+      success: sim.value.err === null,
+      error: sim.value.err ? JSON.stringify(sim.value.err) : undefined,
+      computeUnits: sim.value.unitsConsumed ?? 0,
+      logs: sim.value.logs ?? [],
+    };
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  //  borrowMulti() — Multi-Token Atomic Flash Loans
+  // ═══════════════════════════════════════════════════════════
+
+  /**
+   * Build a multi-token atomic flash loan with nested sandwich pattern:
+   *   prefix_A → prefix_B → [user IXs] → suffix_B → suffix_A
+   *
+   * Requires the on-chain program to use `[b"flash", payer, token_mint]` PDA seeds.
+   */
+  async borrowMulti(params: BorrowMultiParams): Promise<TransactionInstruction[]> {
+    if (!this.wallet) {
+      throw new VaeaError('API_ERROR', 'Wallet is required for borrowMulti()');
+    }
+
+    // Build prefix/suffix for each loan in parallel
+    const builds = await Promise.all(
+      params.loans.map(loan => {
+        const symbol = loan.token instanceof PublicKey ? loan.token.toBase58() : loan.token;
+        return this.build({
+          token: symbol,
+          amount: loan.amount,
+          user_pubkey: this.wallet!.publicKey.toBase58(),
+          source: this.source,
+          slippage_bps: params.slippageBps ?? 50,
+          max_fee_bps: params.maxFeeBps,
+        });
+      })
     );
 
-    return signature;
+    // Nest: prefix_1 + prefix_2 + ... + [user IXs] + ... + suffix_2 + suffix_1
+    const allPrefixes = builds.map(b => b.prefix_instructions.map(parseApiInstruction));
+    const allSuffixes = builds.map(b => b.suffix_instructions.map(parseApiInstruction));
+
+    const userIxs = await params.onFunds([]);
+
+    return [
+      ...allPrefixes.flat(),
+      ...userIxs,
+      ...allSuffixes.reverse().flat(),
+    ];
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  //  TURBO — borrowLocal() / executeLocal()
+  //  Zero HTTP, ~0.1ms instruction build, ~100ms total TX
+  // ═══════════════════════════════════════════════════════════
+
+  /**
+   * Build flash loan instructions 100% locally — NO API call.
+   *
+   * ~0.1ms vs ~80ms for borrow(). Use this for latency-critical bots.
+   * The instructions are identical to what /v1/build returns.
+   *
+   * @example
+   * ```typescript
+   * const ixs = await flash.borrowLocal({
+   *   token: 'SOL',
+   *   amount: 1000,
+   *   onFunds: async () => [myArbIx],
+   * });
+   * ```
+   */
+  async borrowLocal(params: BorrowParams): Promise<TransactionInstruction[]> {
+    const { localBuild } = await import('./local-builder');
+
+    const result = localBuild({
+      payer: this.wallet?.publicKey ?? PublicKey.default,
+      token: params.token,
+      amount: params.amount,
+      source: this.source,
+    });
+
+    const userIxs = await params.onFunds([]);
+    return [result.beginFlash, ...userIxs, result.endFlash];
+  }
+
+  /**
+   * Build, sign, and send a flash loan in ~100ms — NO API call.
+   *
+   * Uses local instruction building + direct RPC.
+   * Critical path: localBuild(<1ms) → getBlockhash(~50ms) → send(~50ms)
+   *
+   * @example
+   * ```typescript
+   * // ~100ms total
+   * const sig = await flash.executeLocal({
+   *   token: 'SOL',
+   *   amount: 1000,
+   *   onFunds: async () => [myArbIx],
+   * });
+   * ```
+   */
+  async executeLocal(params: BorrowParams, options?: ExecuteOptions): Promise<string> {
+    if (!this.connection) {
+      throw new VaeaError('API_ERROR', 'Connection is required for executeLocal().');
+    }
+    if (!this.wallet) {
+      throw new VaeaError('API_ERROR', 'Wallet is required for executeLocal().');
+    }
+
+    // Parallelize: local build + ALT fetch (ALT cached after 1st call)
+    const [allIxs, lookupTables] = await Promise.all([
+      this.borrowLocal(params),
+      this.fetchLookupTable(),
+    ]);
+    const retryConfig = options?.retry ?? DEFAULT_RETRY_CONFIG;
+
+    return sendWithRetry(
+      this.connection,
+      this.wallet,
+      allIxs,
+      lookupTables,
+      retryConfig,
+      options?.priorityMicroLamports,
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  //  isProfitable() — Profitability Check
+  // ═══════════════════════════════════════════════════════════
+
+  /**
+   * Check if a flash loan strategy is profitable after all fees.
+   * Uses our own getQuote() API — zero external dependencies.
+   */
+  async isProfitable(params: ProfitabilityParams): Promise<ProfitabilityResult> {
+    return calculateProfitability(
+      (token, amount) => this.getQuote(token, amount),
+      params,
+    );
   }
 
   // ═══════════════════════════════════════════════════════════

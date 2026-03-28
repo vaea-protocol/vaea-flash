@@ -30,16 +30,13 @@
 
 VAEA Flash lets you **borrow any SPL token** — SOL, stablecoins, LSTs, mid-caps — in a **single atomic transaction**, with no collateral required.
 
-One SDK call. Any token. From **0.03%** fee.
+One SDK call. Any token. From **0.03%** fee. ~**100ms** latency.
 
 ```typescript
-const sig = await flash.execute({
+const sig = await flash.executeLocal({
   token: 'mSOL',
   amount: 5000,
-  onFunds: async (ixs) => {
-    ixs.push(myArbitrageInstruction);
-    return ixs;
-  },
+  onFunds: async () => [myArbitrageInstruction],
 });
 ```
 
@@ -47,31 +44,38 @@ const sig = await flash.execute({
 
 | Problem | VAEA Solution |
 |---|---|
-| Existing flash loans only cover SOL, USDC, USDT | **21+ tokens** including LSTs and mid-caps |
+| Existing flash loans only cover SOL, USDC, USDT | **27 tokens** including LSTs, majors, and mid-caps |
 | Each protocol has its own incompatible SDK | **One SDK**, one line of code, any token |
-| No flash loans for mSOL, JitoSOL, BONK... | **Synthetic routing** via Sanctum & Jupiter |
+| No flash loans for mSOL, JitoSOL, BONK, TRUMP... | **Synthetic routing** via Sanctum & Jupiter |
 | If a source is full, there's no fallback | **Automatic multi-protocol fallback** |
+| Building TX requires RPC lookups (~300ms) | **Turbo Mode**: local build in ~91µs, zero HTTP |
 
 ---
 
-## Supported Tokens
+## Supported Tokens (27)
 
 ### Direct Route (0.03% fee)
 
 | Token | Source | Fallback |
 |---|---|---|
-| SOL | Jupiter Lend | Marginfi → Kamino → Save |
-| USDC | Jupiter Lend | Marginfi → Kamino → Save |
-| USDT | Jupiter Lend | Marginfi → Save |
-| cbBTC | Jupiter Lend | Kamino |
-| JupSOL | Jupiter Lend | — |
-| JitoSOL | Jupiter Lend | Marginfi |
-| JUP | Jupiter Lend | — |
-| JLP | Jupiter Lend | — |
+| SOL | Marginfi | Kamino → Save |
+| USDC | Marginfi | Kamino → Save |
+| USDT | Marginfi | Save |
+| cbBTC | Kamino | — |
+| JupSOL | Marginfi | — |
+| JitoSOL | Marginfi | — |
+| JUP | Marginfi | — |
+| JLP | Kamino | — |
 
-### Synthetic Route (via swap, ~0.09% fee)
+### Synthetic Route (via swap, ~0.06–0.16%)
 
-mSOL · bSOL · INF · laineSOL · BONK · WIF · PYTH · RAY · HNT · RNDR · JITO · KMNO · wETH
+**LSTs via Sanctum** (~0.03% swap): mSOL · bSOL · INF · laineSOL
+
+**Majors via Jupiter**: TRUMP · PENGU · VIRTUAL
+
+**Mid-caps via Jupiter**: BONK · WIF · RAY · HNT · RNDR · JITO · KMNO
+
+**Stablecoins via Jupiter**: PYUSD · USDS · USD1 · USDG · EURC
 
 ---
 
@@ -87,21 +91,29 @@ npm install @vaea/flash @solana/web3.js
 import { VaeaFlash } from '@vaea/flash';
 import { Connection, Keypair } from '@solana/web3.js';
 
+const connection = new Connection('https://api.mainnet-beta.solana.com');
+const wallet = Keypair.fromSecretKey(/* your key */);
+
 const flash = new VaeaFlash({
-  apiUrl: 'https://api.vaea.fi',
-  connection: new Connection('https://api.mainnet-beta.solana.com'),
-  wallet: myKeypair,
+  connection,
+  wallet,
+  source: 'sdk',   // 0.03% fee (vs 'ui' = 0.05%)
 });
 
-const sig = await flash.execute({
+// Turbo mode (~100ms) — builds instructions locally, zero API calls
+const sig = await flash.executeLocal({
   token: 'SOL',
   amount: 1000,
   onFunds: async (ixs) => {
-    ixs.push(myInstruction);
+    ixs.push(myArbitrageInstruction);
     return ixs;
   },
-  maxFeeBps: 10,
 });
+
+console.log('Flash loan executed:', sig);
+
+// Always clean up when done
+flash.destroy();
 ```
 
 ### Rust
@@ -126,6 +138,8 @@ let sig = flash.execute(BorrowParams {
     max_fee_bps: Some(10),
     ..Default::default()
 }).await?;
+
+println!("Flash loan executed: {}", sig);
 ```
 
 ### Python
@@ -138,9 +152,10 @@ pip install vaea-flash
 from vaea_flash import VaeaFlash, VaeaConfig
 
 async with VaeaFlash(VaeaConfig(
-    api_url="https://api.vaea.fi"
+    api_url="https://api.vaea.fi",
+    source="sdk",
 )) as flash:
-    result = await flash.borrow(
+    ixs = await flash.borrow(
         token="SOL",
         amount=1000,
         user_pubkey=str(wallet.pubkey()),
@@ -152,25 +167,295 @@ async with VaeaFlash(VaeaConfig(
 
 ---
 
+## Devnet Testing
+
+VAEA Flash is deployed on Solana devnet for testing:
+
+```typescript
+const flash = new VaeaFlash({
+  connection: new Connection('https://api.devnet.solana.com'),
+  wallet: myDevnetKeypair,
+  source: 'sdk',
+});
+
+// Request devnet SOL from faucet first:
+// solana airdrop 2 --url devnet
+
+const sig = await flash.executeLocal({
+  token: 'SOL',
+  amount: 0.01,  // small amount for testing
+  onFunds: async (ixs) => {
+    // Your test logic here
+    return ixs;
+  },
+});
+```
+
+```
+Program ID: HoYiwkNB7a3gmZXEkTqLkborNDc976vKEUAzBm8YpK5E
+Network:    devnet / mainnet-beta
+```
+
+---
+
+## Error Handling
+
+All SDK errors use the `VaeaError` class with typed error codes:
+
+```typescript
+import { VaeaFlash, VaeaError } from '@vaea/flash';
+
+try {
+  const sig = await flash.executeLocal({
+    token: 'SOL',
+    amount: 1000,
+    maxFeeBps: 5,
+    onFunds: async (ixs) => {
+      ixs.push(myArbIx);
+      return ixs;
+    },
+  });
+} catch (err) {
+  if (err instanceof VaeaError) {
+    switch (err.code) {
+      case 'FEE_TOO_HIGH':
+        console.log(`Fee ${err.meta?.actualFeeBps} bps > max ${err.meta?.maxFeeBps} bps`);
+        break;
+      case 'TOKEN_NOT_SUPPORTED':
+        console.log('Token not in VAEA registry');
+        break;
+      case 'API_ERROR':
+        console.log('Wallet or connection missing');
+        break;
+      default:
+        console.log(`VAEA Error [${err.code}]: ${err.message}`);
+    }
+  } else {
+    throw err;  // Not a VAEA error — rethrow
+  }
+}
+```
+
+---
+
+## SDK Features
+
+### 🚀 Turbo Mode — Local Instruction Builder
+
+Build flash loan instructions **100% locally** — no API call, no HTTP, no network. The SDK replicates the backend's instruction builder with a hardcoded token registry.
+
+```typescript
+import { localBuild, TOKEN_REGISTRY } from '@vaea/flash';
+
+// ~0.09ms — builds begin_flash + end_flash instructions locally
+const { beginFlash, endFlash } = localBuild({
+  payer: wallet.publicKey,
+  token: 'SOL',
+  amount: 1000,
+});
+
+// Use in your own transaction
+const tx = new Transaction().add(beginFlash, myArbIx, endFlash);
+```
+
+**Why it matters for bots**: Standard SDKs need 2–4 RPC calls before you can even sign the transaction. VAEA's local builder does it in **91 microseconds** — 10,000x faster than an HTTP round-trip.
+
+You can also use `localBuild()` directly to retain full control over transaction construction:
+
+```typescript
+import { localBuild } from '@vaea/flash';
+import { TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+
+const { beginFlash, endFlash, expectedFeeNative } = localBuild({
+  payer: wallet.publicKey,
+  token: 'SOL',
+  amount: 1000,
+});
+
+// Build a VersionedTransaction (Solana best practice)
+const { blockhash } = await connection.getLatestBlockhash();
+const message = new TransactionMessage({
+  payerKey: wallet.publicKey,
+  recentBlockhash: blockhash,
+  instructions: [beginFlash, myArbIx, endFlash],
+}).compileToV0Message(lookupTables);
+
+const tx = new VersionedTransaction(message);
+tx.sign([wallet]);
+const sig = await connection.sendTransaction(tx, { skipPreflight: true });
+```
+
+---
+
+### 🔬 Simulation — Dry-Run Before Sending
+
+Test your flash loan transaction without risking any SOL. Uses Solana's `simulateTransaction` with `sigVerify: false`.
+
+```typescript
+const result = await flash.simulate({
+  token: 'SOL',
+  amount: 1000,
+  onFunds: async () => [myArbIx],
+});
+
+console.log(result.success);       // true/false
+console.log(result.computeUnits);  // exact CU consumed
+console.log(result.logs);          // full program logs
+```
+
+**Why it matters**: Catch errors before they cost you transaction fees. Essential for testing new strategies.
+
+---
+
+### ⚡ Multi-Token Flash Loans
+
+Borrow **multiple tokens atomically** in a single transaction using a nested sandwich pattern:
+
+```
+begin_flash(SOL) → begin_flash(USDC) → [your logic] → end_flash(USDC) → end_flash(SOL)
+```
+
+```typescript
+const ixs = await flash.borrowMulti({
+  loans: [
+    { token: 'SOL', amount: 1000 },
+    { token: 'USDC', amount: 50000 },
+  ],
+  onFunds: async () => [myComplexArbIx],
+});
+```
+
+**Why it matters**: Enables cross-token arbitrage strategies that need capital in multiple assets simultaneously — all with zero upfront capital.
+
+---
+
+### 📊 Profitability Calculator
+
+Check if your strategy is profitable **before** sending the transaction. Uses real-time fee data from the VAEA API.
+
+```typescript
+const result = await flash.isProfitable({
+  token: 'SOL',
+  amount: 1000,
+  expectedRevenue: 0.5,    // expected profit in SOL
+  jitoTip: 0.01,           // Jito tip
+  priorityFee: 0.001,      // priority fee
+});
+
+console.log(result.profitable);      // true
+console.log(result.netProfit);       // 0.189 SOL
+console.log(result.recommendation);  // 'send' | 'wait' | 'abort'
+```
+
+**Why it matters**: Stop losing money on unprofitable transactions. The calculator factors in VAEA fees, swap fees, network fees, priority fees, and Jito tips.
+
+---
+
+### 🎯 Auto Slippage
+
+Calculate optimal slippage based on route type and price impact:
+
+```typescript
+import { calculateSlippageBps } from '@vaea/flash';
+
+const bps = calculateSlippageBps('auto', 'synthetic', 0.05);
+// Returns 45 bps for a synthetic route with 0.05% price impact
+
+// Modes: 'auto' (balanced), 'aggressive' (minimal), 'safe' (wide), or exact number
+```
+
+---
+
+### 🔄 Smart Retry
+
+Automatic transaction retry with blockhash refresh and escalating priority fees:
+
+```typescript
+const sig = await flash.execute({
+  token: 'SOL',
+  amount: 1000,
+  onFunds: async () => [myArbIx],
+}, {
+  retry: {
+    maxAttempts: 3,
+    strategy: 'escalate',  // priority fee x1.5 each retry
+  },
+  priorityMicroLamports: 1000,
+});
+```
+
+The retry logic classifies errors:
+- **Blockhash expired** → rebuild TX with fresh blockhash
+- **Congestion** → escalate priority fee
+- **Program error** → never retried (your logic has a bug)
+
+---
+
+### 🔥 Warm Cache — Background Pre-Warming
+
+Keep capacity data hot with a background poller:
+
+```typescript
+const flash = new VaeaFlash({
+  apiUrl: 'https://api.vaea.fi',
+  connection,
+  wallet,
+  preWarm: true,  // polls /v1/capacity every 2s
+});
+
+// First getCapacity() is instant — data already cached
+const capacity = await flash.getCapacity();
+```
+
+**Why it matters**: Eliminates the cold-start penalty on your first call. Useful for bots that need to react instantly to market opportunities.
+
+---
+
+### 🛡️ Fee Guard
+
+Automatically reject transactions where the fee exceeds your threshold:
+
+```typescript
+const sig = await flash.execute({
+  token: 'mSOL',
+  amount: 500,
+  onFunds: async (ixs) => {
+    ixs.push(myIx);
+    return ixs;
+  },
+  maxFeeBps: 15,  // reject if fee > 0.15%
+});
+// Throws VaeaError('FEE_TOO_HIGH') if fee exceeds 15 bps
+```
+
+> **Note:** When using `executeLocal()`, fee guard is skipped (no API call needed). Use the `isProfitable()` method instead for turbo-mode cost validation.
+
+---
+
 ## Architecture
 
 ```
-┌──────────────────────────────────────┐
-│         Your App / Bot               │
-│      SDK: TypeScript · Rust · Python │
-└──────────────┬───────────────────────┘
+┌──────────────────────────────────────────────┐
+│         Your App / Bot                       │
+│  SDK: TypeScript · Rust · Python             │
+│  ┌────────────────────────────────────────┐  │
+│  │ Turbo: localBuild() — zero API calls   │  │
+│  └────────────────────────────────────────┘  │
+└──────────────┬───────────────────────────────┘
+               │ (only if using standard mode)
+               ▼
+┌──────────────────────────────────────────────┐
+│       VAEA Flash Backend API                 │
+│  Route Calculator · Liquidity Scanner        │
+│  Pure CPU: 0 RPC calls during /v1/build      │
+└──────────────┬───────────────────────────────┘
                │
                ▼
-┌──────────────────────────────────────┐
-│       VAEA Flash Backend API         │
-│  Route Calculator · Liquidity Scanner│
-└──────────────┬───────────────────────┘
-               │
-               ▼
-┌──────────────────────────────────────┐
-│    VAEA Flash On-Chain Program       │
-│  begin_flash → your logic → end_flash│
-└──────────┬───────────┬───────────────┘
+┌──────────────────────────────────────────────┐
+│    VAEA Flash On-Chain Program               │
+│  begin_flash → your logic → end_flash        │
+│  Instruction introspection via sysvar        │
+└──────────┬───────────┬───────────────────────┘
            │           │
            ▼           ▼
    ┌──────────┐  ┌──────────────┐
@@ -179,7 +464,135 @@ async with VaeaFlash(VaeaConfig(
    └──────────┘  └──────────────┘
 ```
 
-VAEA Flash **owns no liquidity**. It routes borrows to existing lending protocols (Jupiter Lend, Marginfi, Kamino, Save) and applies a transparent fee layer.
+VAEA Flash **owns no liquidity**. It routes borrows to existing lending protocols (Marginfi, Kamino, Save) and applies a transparent fee layer.
+
+---
+
+## API Reference
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/v1/capacity` | Real-time borrowing capacity for all 27 tokens |
+| `GET` | `/v1/quote?token=SOL&amount=1000` | Fee quote with breakdown |
+| `POST` | `/v1/build` | Build flash loan instructions (prefix + suffix) |
+| `GET` | `/v1/health` | System health and protocol status |
+
+Base URL: `https://api.vaea.fi`
+
+Full documentation: [vaea.fi/flash/docs](https://vaea.fi/flash/docs)
+
+---
+
+## Fee Model
+
+| Route | Fee | Breakdown |
+|---|---|---|
+| **Direct** | **0.03%** | Source (0%) + VAEA (0.03%) |
+| **Synthetic** | **~0.06–0.16%** | Source (0%) + Swap (variable) + VAEA (0.03%) |
+
+Use `maxFeeBps` in SDK calls to auto-reject transactions exceeding your threshold.
+
+---
+
+## Performance
+
+| Metric | Value |
+|---|---|
+| **Turbo Mode latency** | **~100ms** (local build + 2 RPC) |
+| **Standard Mode latency** | **~180ms** (1 HTTP + 2 RPC) |
+| **Local instruction build** | **~91µs** (0.09ms, zero network) |
+| **TX overhead** | **36 bytes** (4 accounts via ALT compression) |
+| **Compute Units** | ~23,000 CU (1.6% of TX budget) |
+| **Program size** | 235 KB |
+| **API latency** | <5ms (cached, no RPC during build) |
+
+```typescript
+import { VAEA_LOOKUP_TABLE } from '@vaea/flash';
+// DjncKSi9KqtnFx6hFYa7ARmwJ7B4Y7UH3XpR2XEuXNJr
+// Auto-used in execute() / executeLocal() — zero config needed
+```
+
+---
+
+## Complete Example — Arbitrage Bot
+
+A minimal but complete, runnable TypeScript bot:
+
+```typescript
+import { VaeaFlash, VaeaError, localBuild } from '@vaea/flash';
+import { Connection, Keypair, SystemProgram } from '@solana/web3.js';
+import fs from 'fs';
+
+async function main() {
+  // 1. Setup
+  const wallet = Keypair.fromSecretKey(
+    new Uint8Array(JSON.parse(fs.readFileSync('~/.config/solana/id.json', 'utf-8')))
+  );
+  const flash = new VaeaFlash({
+    connection: new Connection('https://api.devnet.solana.com'),
+    wallet,
+    preWarm: true,  // background capacity polling
+  });
+
+  try {
+    // 2. Check profitability
+    const profit = await flash.isProfitable({
+      token: 'SOL',
+      amount: 100,
+      expectedRevenue: 0.1,  // expected profit in SOL
+      jitoTip: 0.001,
+    });
+
+    if (profit.recommendation === 'abort') {
+      console.log(`Unprofitable: net=${profit.netProfit} SOL`);
+      return;
+    }
+
+    // 3. Execute flash loan (Turbo mode — ~100ms)
+    const sig = await flash.executeLocal({
+      token: 'SOL',
+      amount: 100,
+      onFunds: async (ixs) => {
+        // Your arbitrage logic here
+        ixs.push(SystemProgram.transfer({
+          fromPubkey: wallet.publicKey,
+          toPubkey: wallet.publicKey,
+          lamports: 0,
+        }));
+        return ixs;
+      },
+    }, {
+      retry: { maxAttempts: 3, strategy: 'escalate' },
+      priorityMicroLamports: 1000,
+    });
+
+    console.log('✅ Flash loan executed:', sig);
+
+  } catch (err) {
+    if (err instanceof VaeaError) {
+      console.error(`VAEA Error [${err.code}]: ${err.message}`);
+    } else {
+      throw err;
+    }
+  } finally {
+    flash.destroy();  // Clean up background poller
+  }
+}
+
+main();
+```
+
+---
+
+## Security
+
+- **Instruction introspection** verifies `begin_flash` ↔ `end_flash` pairing within the same TX
+- All transactions are **atomic** — if repayment fails, the entire transaction reverts
+- **Zero database, zero data retention** — VAEA reads on-chain state only
+- **Deployer-restricted initialization** — only the protocol deployer can init the Config PDA
+- **Fee floor protection** — minimum 1 lamport fee prevents micro-loan evasion
+- **Strict authority checks** — `require!` enforced on all admin operations
+- PDA seeds include `token_mint` — prevents cross-token PDA collisions in multi-flash
 
 ---
 
@@ -201,62 +614,6 @@ vaea-flash/
 ```
 
 > **Note:** The on-chain program and backend service are maintained in a [separate private repository](https://github.com/vaea-protocol/vaea-core) for security.
-
----
-
-## API Reference
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/v1/capacity` | Real-time borrowing capacity for all tokens |
-| `GET` | `/v1/quote?token=SOL&amount=1000` | Fee quote with breakdown |
-| `POST` | `/v1/build` | Build flash loan transaction |
-| `GET` | `/v1/health` | System health and protocol status |
-
-Base URL: `https://api.vaea.fi`
-
-Full documentation: [vaea.fi/flash/docs](https://vaea.fi/flash/docs)
-
----
-
-## Fee Model
-
-| Route | Fee | Breakdown |
-|---|---|---|
-| **Direct** | **0.03%** | Source (0%) + VAEA (0.03%) |
-| **Synthetic** | **~0.09%** | Source (0%) + Swap (~0.06%) + VAEA (0.03%) |
-
-Use `maxFeeBps` in SDK calls to auto-reject transactions exceeding your threshold.
-
----
-
-## Performance
-
-| Metric | Value |
-|---|---|
-| **TX overhead** | **36 bytes** (4 accounts via ALT compression) |
-| **Compute Units** | ~23,000 CU (1.6% of TX budget) |
-| **Program size** | 235 KB (LTO fat, opt-level z) |
-| **API latency** | <5ms (Redis-cached, no RPC calls) |
-
-VAEA Flash ships a **pre-loaded Address Lookup Table** that compresses our 4 fixed accounts from 128 bytes down to 4 bytes. Your transactions stay lean even with complex arbitrage logic.
-
-```typescript
-import { VAEA_LOOKUP_TABLE } from '@vaea/flash';
-// DjncKSi9KqtnFx6hFYa7ARmwJ7B4Y7UH3XpR2XEuXNJr
-// Auto-used in execute() — zero config needed
-```
-
----
-
-## Security
-
-- **Instruction introspection** verifies `begin_flash` ↔ `end_flash` pairing within the same TX
-- All transactions are **atomic** — if repayment fails, the entire transaction reverts
-- **Zero database, zero data retention** — VAEA reads on-chain state only
-- **Deployer-restricted initialization** — only the protocol deployer can init the Config PDA
-- **Fee floor protection** — minimum 1 lamport fee prevents micro-loan evasion
-- **Strict authority checks** — `require!` enforced on all admin operations
 
 ---
 

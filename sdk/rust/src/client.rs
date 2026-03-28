@@ -161,10 +161,9 @@ impl VaeaFlash {
         let payer = self.payer.as_ref()
             .ok_or_else(|| VaeaError::protocol(VaeaErrorCode::ApiError, "Payer keypair required"))?;
 
-        // Get quote for fee guard
-        let quote = self.get_quote(&params.token, params.amount).await?;
-
+        // Fee guard — ONLY fetch quote if user set max_fee_bps (saves ~100ms for bots)
         if let Some(max_bps) = params.max_fee_bps {
+            let quote = self.get_quote(&params.token, params.amount).await?;
             let actual_bps = (quote.fee_breakdown.total_fee_pct * 100.0) as u16;
             if actual_bps > max_bps {
                 return Err(VaeaError::protocol(
@@ -232,6 +231,108 @@ impl VaeaFlash {
             .map_err(|e| VaeaError::Transaction(e.to_string()))?;
 
         Ok(sig.to_string())
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  simulate() — Dry Run
+    // ═══════════════════════════════════════════════════════
+
+    /// Simulate a flash loan transaction without sending it.
+    /// Returns success/failure, CU consumption, and program logs.
+    pub async fn simulate(&self, params: &BorrowParams) -> Result<SimulateResult, VaeaError> {
+        let rpc = self.rpc.as_ref()
+            .ok_or_else(|| VaeaError::protocol(VaeaErrorCode::ApiError, "RPC required for simulate()"))?;
+        let payer = self.payer.as_ref()
+            .ok_or_else(|| VaeaError::protocol(VaeaErrorCode::ApiError, "Payer required for simulate()"))?;
+
+        let all_ixs = self.borrow(params).await?;
+        let blockhash = rpc.get_latest_blockhash_with_commitment(CommitmentConfig::confirmed())
+            .await
+            .map_err(|e| VaeaError::Rpc(e.to_string()))?
+            .0;
+
+        let lookup_tables = self.fetch_lookup_table(rpc).await;
+        let msg = v0::Message::try_compile(
+            &payer.pubkey(),
+            &all_ixs,
+            &lookup_tables,
+            blockhash,
+        ).map_err(|e| VaeaError::Transaction(e.to_string()))?;
+
+        let tx = VersionedTransaction::try_new(VersionedMessage::V0(msg), &[payer.as_ref()])
+            .map_err(|e| VaeaError::Transaction(e.to_string()))?;
+
+        let sim = rpc.simulate_transaction(&tx)
+            .await
+            .map_err(|e| VaeaError::Rpc(e.to_string()))?;
+
+        Ok(SimulateResult {
+            success: sim.value.err.is_none(),
+            error: sim.value.err.map(|e| format!("{:?}", e)),
+            compute_units: sim.value.units_consumed.unwrap_or(0),
+            logs: sim.value.logs.unwrap_or_default(),
+        })
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  borrow_multi() — Multi-Token Atomic Flash Loans
+    // ═══════════════════════════════════════════════════════
+
+    /// Build a multi-token atomic flash loan with nested sandwich pattern:
+    ///   prefix_A → prefix_B → [user IXs] → suffix_B → suffix_A
+    pub async fn borrow_multi(&self, params: &BorrowMultiParams) -> Result<Vec<Instruction>, VaeaError> {
+        let payer = self.payer.as_ref()
+            .ok_or_else(|| VaeaError::protocol(VaeaErrorCode::ApiError, "Payer required for borrow_multi()"))?;
+
+        // Build prefix/suffix for each loan
+        let mut all_builds = Vec::new();
+        for loan in &params.loans {
+            let request = BuildRequest {
+                token: loan.token.clone(),
+                amount: loan.amount,
+                user_pubkey: payer.pubkey().to_string(),
+                source: Some(self.source.to_string()),
+                slippage_bps: params.slippage_bps,
+                max_fee_bps: params.max_fee_bps,
+            };
+            all_builds.push(self.build(&request).await?);
+        }
+
+        let mut all_ixs = Vec::new();
+
+        // All prefixes in order
+        for build in &all_builds {
+            for api_ix in &build.prefix_instructions {
+                all_ixs.push(Self::parse_api_instruction(api_ix)?);
+            }
+        }
+
+        // User instructions
+        for ix in &params.instructions {
+            all_ixs.push(ix.clone());
+        }
+
+        // All suffixes in reverse order (nested sandwich)
+        for build in all_builds.iter().rev() {
+            for api_ix in &build.suffix_instructions {
+                all_ixs.push(Self::parse_api_instruction(api_ix)?);
+            }
+        }
+
+        Ok(all_ixs)
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  is_profitable() — Profitability Check
+    // ═══════════════════════════════════════════════════════
+
+    /// Check if a flash loan strategy is profitable after all fees.
+    pub async fn is_profitable(
+        &self,
+        params: &crate::profitability::ProfitabilityParams,
+    ) -> Result<crate::profitability::ProfitabilityResult, VaeaError> {
+        let quote = self.get_quote(&params.token, params.amount).await?;
+        Ok(crate::profitability::calculate_profitability(&quote, params))
     }
 
     /// Fetch the VAEA Address Lookup Table for TX compression.
