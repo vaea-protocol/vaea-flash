@@ -24,6 +24,13 @@
   <a href="https://twitter.com/vaboratory">Twitter</a>
 </p>
 
+<p align="center">
+  <img alt="Network" src="https://img.shields.io/badge/network-devnet-orange?style=flat-square" />
+  <img alt="Mainnet" src="https://img.shields.io/badge/mainnet-April%202026-29C1A2?style=flat-square" />
+</p>
+
+> **⚠️ Status:** VAEA Flash est actuellement déployé sur **Solana Devnet**. Le lancement sur **Mainnet arrive très prochainement courant avril 2026**. Les SDKs, l'API et la documentation sont production-ready — seul le programme on-chain n'est pas encore live sur mainnet.
+
 ---
 
 ## What is VAEA Flash?
@@ -169,7 +176,12 @@ async with VaeaFlash(VaeaConfig(
 
 ## Devnet Testing
 
-VAEA Flash is deployed on Solana devnet for testing:
+VAEA Flash is currently deployed on **Solana Devnet only**. Mainnet deployment is coming in **April 2026**.
+
+```
+Program ID (devnet): HoYiwkNB7a3gmZXEkTqLkborNDc976vKEUAzBm8YpK5E
+Program ID (mainnet): Coming April 2026
+```
 
 ```typescript
 const flash = new VaeaFlash({
@@ -189,11 +201,6 @@ const sig = await flash.executeLocal({
     return ixs;
   },
 });
-```
-
-```
-Program ID: HoYiwkNB7a3gmZXEkTqLkborNDc976vKEUAzBm8YpK5E
-Network:    devnet / mainnet-beta
 ```
 
 ---
