@@ -130,7 +130,7 @@ export default function TokenPage() {
         </div>
 
         {/* ═══ Live Stats Bar ═══ */}
-        <div className="fade-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 28 }}>
+        <div className="fade-in grid-4" style={{ gap: 12, marginBottom: 28 }}>
           <div style={{ background: 'white', borderRadius: 20, padding: '18px 20px', border: '1px solid var(--border)' }}>
             <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Max Available</div>
             <div style={{ fontSize: '1.35rem', fontWeight: 900 }}>
@@ -168,7 +168,7 @@ export default function TokenPage() {
         </div>
 
         {/* ═══ Two-Column Grid ═══ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        <div className="grid-2" style={{ gap: 24 }}>
 
           {/* ── Flash Loan Calculator ── */}
           <div className="card fade-in fade-in-1" style={{ border: 'none' }}>

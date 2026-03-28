@@ -200,6 +200,7 @@ impl VaeaFlash {
     }
 
     /// Build, sign, and send a flash loan transaction.
+    /// Automatically uses the VAEA Address Lookup Table for TX compression.
     pub async fn execute(&self, params: BorrowParams) -> Result<String, VaeaError> {
         let rpc = self.rpc.as_ref()
             .ok_or_else(|| VaeaError::protocol(VaeaErrorCode::ApiError, "RPC client required for execute(). Use VaeaFlash::with_rpc()"))?;
@@ -213,14 +214,17 @@ impl VaeaFlash {
             .map_err(|e| VaeaError::Rpc(e.to_string()))?
             .0;
 
+        // Fetch our pre-loaded ALT for TX compression (~124 bytes saved)
+        let lookup_tables = self.fetch_lookup_table(rpc).await;
+
         let msg = v0::Message::try_compile(
             &payer.pubkey(),
             &all_ixs,
-            &[],
+            &lookup_tables,
             blockhash,
         ).map_err(|e| VaeaError::Transaction(e.to_string()))?;
 
-        let mut tx = VersionedTransaction::try_new(VersionedMessage::V0(msg), &[payer.as_ref()])
+        let tx = VersionedTransaction::try_new(VersionedMessage::V0(msg), &[payer.as_ref()])
             .map_err(|e| VaeaError::Transaction(e.to_string()))?;
 
         let sig = rpc.send_and_confirm_transaction(&tx)
@@ -228,6 +232,25 @@ impl VaeaFlash {
             .map_err(|e| VaeaError::Transaction(e.to_string()))?;
 
         Ok(sig.to_string())
+    }
+
+    /// Fetch the VAEA Address Lookup Table for TX compression.
+    async fn fetch_lookup_table(&self, rpc: &RpcClient) -> Vec<solana_sdk::address_lookup_table::AddressLookupTableAccount> {
+        use solana_sdk::address_lookup_table::AddressLookupTableAccount;
+        use crate::types::VAEA_LOOKUP_TABLE;
+
+        match rpc.get_account(&VAEA_LOOKUP_TABLE).await {
+            Ok(account) => {
+                match solana_sdk::address_lookup_table::state::AddressLookupTable::deserialize(&account.data) {
+                    Ok(table) => vec![AddressLookupTableAccount {
+                        key: VAEA_LOOKUP_TABLE,
+                        addresses: table.addresses.to_vec(),
+                    }],
+                    Err(_) => vec![],
+                }
+            }
+            Err(_) => vec![], // Graceful fallback: TX works without ALT
+        }
     }
 
     // ═══════════════════════════════════════════════════════

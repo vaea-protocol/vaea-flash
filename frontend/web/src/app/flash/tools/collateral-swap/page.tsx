@@ -20,7 +20,7 @@ export default function CollateralSwapPage() {
       <div className="mx" style={{ paddingTop: 32, paddingBottom: 80 }}>
         <Link href="/flash/tools" style={{ color: 'var(--text-3)', fontSize: '0.82rem', textDecoration: 'none', fontWeight: 600 }}>← All Tools</Link>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', alignItems: 'center', gap: 20, marginTop: 20 }}>
+        <div className="grid-hero" style={{ gap: 20, marginTop: 20 }}>
           <div className="fade-in">
             <div style={{ display: 'inline-flex', padding: '5px 14px', borderRadius: 'var(--r-full)', background: '#29C1A210', color: '#29C1A2', fontSize: '0.72rem', fontWeight: 800, marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Coming Soon
@@ -49,7 +49,7 @@ export default function CollateralSwapPage() {
         {/* ═══ How it works ═══ */}
         <section style={{ marginTop: 56 }}>
           <h2 className="fade-in" style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: 28 }}>How it works</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+          <div className="grid-4" style={{ gap: 16 }}>
             {STEPS.map((s, i) => (
               <div key={s.n} className="fade-in" style={{ animationDelay: `${i * 0.08}s`, padding: '28px 24px', background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)' }}>
                 <div style={{ fontSize: '2rem', fontWeight: 900, color: '#29C1A220', marginBottom: 10 }}>{s.n}</div>

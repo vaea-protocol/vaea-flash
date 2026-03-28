@@ -9,11 +9,13 @@ const NAV = [
   { href: '/flash/tools', label: 'Tools' },
   { href: '/flash/learn', label: 'Learn' },
   { href: '/flash/docs', label: 'Docs' },
+  { href: 'https://github.com/vaea-protocol/vaea-flash', label: 'GitHub', external: true },
 ];
 
 export default function Navbar() {
   const path = usePathname();
   const [showModal, setShowModal] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <>
@@ -31,9 +33,17 @@ export default function Navbar() {
             <Image src="/Logo_noire.png" alt="VAEA" width={80} height={28} style={{ objectFit: 'contain' }} priority />
           </Link>
 
-          <nav className="pill-nav">
+          {/* Desktop nav */}
+          <nav className="pill-nav desktop-only" style={{ flexDirection: 'row' }}>
             {NAV.map(item => {
-              const active = path === item.href || (item.href !== '/flash' && path.startsWith(item.href));
+              const active = !item.external && (path === item.href || (item.href !== '/flash' && path.startsWith(item.href)));
+              if (item.external) {
+                return (
+                  <a key={item.href} href={item.href} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                  </a>
+                );
+              }
               return (
                 <Link key={item.href} href={item.href} className={active ? 'active' : ''}>
                   {item.label}
@@ -42,10 +52,107 @@ export default function Navbar() {
             })}
           </nav>
 
-          <button className="btn btn-dark" style={{ fontSize: '0.8rem', padding: '9px 22px' }} onClick={() => setShowModal(true)}>
+          {/* Desktop connect */}
+          <button className="btn btn-dark desktop-only" style={{ fontSize: '0.8rem', padding: '9px 22px', flexDirection: 'row' }} onClick={() => setShowModal(true)}>
             Connect
           </button>
+
+          {/* Mobile hamburger */}
+          <button
+            className="mobile-only"
+            onClick={() => setMenuOpen(!menuOpen)}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              padding: 8, flexDirection: 'column', gap: 5,
+              display: 'none', /* overridden by mobile-only */
+            }}
+            aria-label="Menu"
+          >
+            <span style={{
+              display: 'block', width: 22, height: 2, borderRadius: 2,
+              background: 'var(--text)', transition: 'all 0.3s',
+              transform: menuOpen ? 'rotate(45deg) translate(4px, 4px)' : 'none',
+            }} />
+            <span style={{
+              display: 'block', width: 22, height: 2, borderRadius: 2,
+              background: 'var(--text)', transition: 'all 0.3s',
+              opacity: menuOpen ? 0 : 1,
+            }} />
+            <span style={{
+              display: 'block', width: 22, height: 2, borderRadius: 2,
+              background: 'var(--text)', transition: 'all 0.3s',
+              transform: menuOpen ? 'rotate(-45deg) translate(4px, -4px)' : 'none',
+            }} />
+          </button>
         </div>
+
+        {/* Mobile menu dropdown */}
+        {menuOpen && (
+          <div
+            className="mobile-only"
+            style={{
+              flexDirection: 'column',
+              padding: '8px 16px 16px',
+              borderTop: '1px solid var(--border)',
+              background: 'rgba(254,244,239,0.98)',
+              backdropFilter: 'blur(20px)',
+              display: 'none', /* overridden by mobile-only */
+            }}
+          >
+            {NAV.map(item => {
+              const active = !item.external && (path === item.href || (item.href !== '/flash' && path.startsWith(item.href)));
+              if (item.external) {
+                return (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMenuOpen(false)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '14px 12px', borderRadius: 14,
+                      fontSize: '0.95rem', fontWeight: 600,
+                      color: 'var(--text-2)', textDecoration: 'none',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    {item.label}
+                  </a>
+                );
+              }
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMenuOpen(false)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '14px 12px',
+                    borderRadius: 14,
+                    fontSize: '0.95rem',
+                    fontWeight: active ? 800 : 600,
+                    color: active ? 'var(--text)' : 'var(--text-2)',
+                    textDecoration: 'none',
+                    background: active ? 'white' : 'transparent',
+                    boxShadow: active ? 'var(--shadow-sm)' : 'none',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+            <button
+              className="btn btn-dark"
+              onClick={() => { setShowModal(true); setMenuOpen(false); }}
+              style={{ marginTop: 8, width: '100%', justifyContent: 'center', padding: '12px 0', fontSize: '0.88rem' }}
+            >
+              Connect Wallet
+            </button>
+          </div>
+        )}
       </header>
 
       {/* Coming Soon Modal */}

@@ -17,6 +17,7 @@ export {
   ApiAccountMeta,
   VAEA_API_URL,
   VAEA_PROGRAM_ID,
+  VAEA_LOOKUP_TABLE,
   SUPPORTED_TOKENS,
   SupportedToken,
 } from './types';

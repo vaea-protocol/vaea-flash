@@ -22,7 +22,7 @@ export default function LeveragePage() {
       <div className="mx" style={{ paddingTop: 32, paddingBottom: 80 }}>
         <Link href="/flash/tools" style={{ color: 'var(--text-3)', fontSize: '0.82rem', textDecoration: 'none', fontWeight: 600 }}>← All Tools</Link>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', alignItems: 'center', gap: 20, marginTop: 20 }}>
+        <div className="grid-hero" style={{ gap: 20, marginTop: 20 }}>
           <div className="fade-in">
             <div style={{ display: 'inline-flex', padding: '5px 14px', borderRadius: 'var(--r-full)', background: '#823FFF10', color: '#823FFF', fontSize: '0.72rem', fontWeight: 800, marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Coming Soon
@@ -59,7 +59,7 @@ export default function LeveragePage() {
         {/* ═══ How it works ═══ */}
         <section style={{ marginTop: 56 }}>
           <h2 className="fade-in" style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: 28 }}>How it works</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+          <div className="grid-4" style={{ gap: 16 }}>
             {STEPS.map((s, i) => (
               <div key={s.n} className="fade-in" style={{ animationDelay: `${i * 0.08}s`, padding: '28px 24px', background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)' }}>
                 <div style={{ fontSize: '2rem', fontWeight: 900, color: '#823FFF20', marginBottom: 10 }}>{s.n}</div>
@@ -74,7 +74,7 @@ export default function LeveragePage() {
         <section style={{ marginTop: 48 }}>
           <div className="fade-in" style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-xl)', border: '1px solid var(--border)', padding: '36px 40px' }}>
             <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>Why One-Click Leverage</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28 }}>
+            <div className="grid-2" style={{ gap: 28 }}>
               <div>
                 <div style={{ fontWeight: 800, fontSize: '0.88rem', marginBottom: 10, color: 'var(--text-3)' }}>Manual looping</div>
                 <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>

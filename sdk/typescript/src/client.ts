@@ -7,6 +7,7 @@ import {
   VersionedTransaction,
   AccountMeta,
   SendOptions,
+  AddressLookupTableAccount,
 } from '@solana/web3.js';
 import {
   VaeaFlashConfig,
@@ -20,6 +21,7 @@ import {
   ApiInstructionData,
   TokenCapacity,
   VAEA_API_URL,
+  VAEA_LOOKUP_TABLE,
   SUPPORTED_TOKENS,
 } from './types';
 
@@ -214,11 +216,14 @@ export class VaeaFlash {
     const allIxs = await this.borrow(params);
     const blockhash = await this.connection.getLatestBlockhash('confirmed');
 
+    // Fetch our pre-loaded ALT to compress the transaction
+    const lookupTables = await this.fetchLookupTable();
+
     const messageV0 = new TransactionMessage({
       payerKey: this.wallet.publicKey,
       recentBlockhash: blockhash.blockhash,
       instructions: allIxs,
-    }).compileToV0Message();
+    }).compileToV0Message(lookupTables);
 
     const tx = new VersionedTransaction(messageV0);
     tx.sign([this.wallet]);
@@ -234,6 +239,32 @@ export class VaeaFlash {
     );
 
     return signature;
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  //  ALT helper — fetch and cache our lookup table
+  // ═══════════════════════════════════════════════════════════
+
+  private lookupTableCache?: AddressLookupTableAccount;
+
+  /**
+   * Fetch the VAEA Address Lookup Table.
+   * Cached after first fetch. Saves ~124 bytes per transaction.
+   */
+  async fetchLookupTable(): Promise<AddressLookupTableAccount[]> {
+    if (!this.connection) return [];
+    if (this.lookupTableCache) return [this.lookupTableCache];
+
+    try {
+      const result = await this.connection.getAddressLookupTable(VAEA_LOOKUP_TABLE);
+      if (result.value) {
+        this.lookupTableCache = result.value;
+        return [result.value];
+      }
+    } catch {
+      // Graceful fallback: if ALT fetch fails, TX still works without it
+    }
+    return [];
   }
 
   // ═══════════════════════════════════════════════════════════

@@ -61,18 +61,16 @@ export default function ToolsHubPage() {
       {TOOLS.map((t, i) => (
         <section key={t.id} className="mx fade-in" style={{ animationDelay: `${i * 0.1}s`, paddingBottom: 20 }}>
           <Link href={`/flash/tools/${t.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: i % 2 === 0 ? '1fr 1fr' : '1fr 1fr',
-              alignItems: 'center',
-              background: 'var(--bg-card)',
-              borderRadius: 'var(--r-xl)',
-              border: '1px solid var(--border)',
-              overflow: 'hidden',
-              transition: 'box-shadow 0.35s var(--ease), transform 0.35s var(--ease)',
-              cursor: 'pointer',
-            }}
-            className="tool-section-card"
+            <div
+              className="tool-section-card grid-hero"
+              style={{
+                background: 'var(--bg-card)',
+                borderRadius: 'var(--r-xl)',
+                border: '1px solid var(--border)',
+                overflow: 'hidden',
+                transition: 'box-shadow 0.35s var(--ease), transform 0.35s var(--ease)',
+                cursor: 'pointer',
+              }}
             >
               {/* 3D side */}
               <div style={{ order: i % 2 === 0 ? 1 : 2 }}>

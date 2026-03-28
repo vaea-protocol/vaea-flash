@@ -226,6 +226,11 @@ pub struct BorrowParams {
 pub const VAEA_API_URL: &str = "https://api.vaea.fi";
 pub const VAEA_PROGRAM_ID: &str = "HoYiwkNB7a3gmZXEkTqLkborNDc976vKEUAzBm8YpK5E";
 
+/// Pre-loaded Address Lookup Table with VAEA fixed accounts.
+/// Saves ~124 bytes per transaction by compressing 4 account addresses.
+pub const VAEA_LOOKUP_TABLE: solana_sdk::pubkey::Pubkey =
+    solana_sdk::pubkey!("DjncKSi9KqtnFx6hFYa7ARmwJ7B4Y7UH3XpR2XEuXNJr");
+
 pub const SUPPORTED_TOKENS: &[&str] = &[
     "SOL", "USDC", "USDT", "JitoSOL", "JupSOL", "JUP", "JLP", "cbBTC",
     "mSOL", "bSOL", "INF", "laineSOL", "wETH",

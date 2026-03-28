@@ -47,7 +47,7 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
 body {
   font-family: 'Outfit', sans-serif;
@@ -314,4 +314,154 @@ h1, h2, h3, h4 {
 .tool-section-card:hover {
   box-shadow: var(--shadow-lg);
   transform: translateY(-4px);
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE UTILITIES
+   ═══════════════════════════════════════════════ */
+
+/* Responsive grid classes — override inline styles */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); }
+.grid-hero { display: grid; grid-template-columns: 1fr 1fr; align-items: center; }
+.grid-sidebar { display: grid; grid-template-columns: 220px 1fr; }
+
+/* Hide mobile-only / desktop-only */
+.mobile-only { display: none !important; }
+.desktop-only { display: flex !important; }
+
+/* ═══ TABLET — max 1024px ═══ */
+@media (max-width: 1024px) {
+  .mx { padding: 0 20px; }
+
+  .grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
+  .grid-sidebar { grid-template-columns: 1fr !important; gap: 20px !important; }
+
+  .vtable th, .vtable td { padding: 12px 14px; font-size: 0.82rem; }
+
+  /* Tool pages hero */
+  .grid-hero { gap: 16px !important; }
+}
+
+/* ═══ MOBILE — max 640px ═══ */
+@media (max-width: 640px) {
+  .mx { padding: 0 16px; }
+
+  h1 { font-size: 1.6rem !important; }
+  h2 { font-size: 1.15rem !important; }
+
+  /* Grids → single column on mobile */
+  .grid-2,
+  .grid-3,
+  .grid-hero { grid-template-columns: 1fr !important; }
+  .grid-4 { grid-template-columns: 1fr 1fr !important; }
+  .grid-sidebar { grid-template-columns: 1fr !important; }
+
+  /* ═══ HERO MOBILE ═══ */
+  .grid-hero { text-align: center; min-height: auto !important; padding: 24px 0 0 !important; gap: 8px !important; overflow: hidden; }
+  .grid-hero .tag { margin-left: auto; margin-right: auto; }
+  .grid-hero h1 { font-size: clamp(1.8rem, 7vw, 2.4rem) !important; }
+  .grid-hero p { margin-left: auto; margin-right: auto; max-width: 90% !important; }
+  .hero-buttons { justify-content: center !important; }
+  .hero-stats { justify-content: center !important; }
+
+  /* ═══ FEATURED MOBILE — horizontal scroll ═══ */
+  .featured-scroll {
+    display: flex !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 12px !important;
+    padding-bottom: 8px;
+    grid-template-columns: unset !important;
+    margin-left: -16px;
+    margin-right: -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .featured-scroll > * {
+    min-width: 200px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+  }
+
+  /* ═══ TOKEN LIST MOBILE — card layout ═══ */
+  .token-cards-mobile {
+    display: flex !important;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .token-card-m {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    border-radius: 16px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s var(--ease);
+  }
+  .token-card-m:active { background: var(--bg); }
+  .token-card-m-info { flex: 1; min-width: 0; }
+  .token-card-m-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+
+  /* ═══ TOKEN DETAIL CARDS — prevent overflow ═══ */
+  .card { padding: 20px; border-radius: 20px; overflow: hidden; min-width: 0; }
+  .card:hover { transform: none; }
+  .card input, .card .input { max-width: 100% !important; box-sizing: border-box; }
+  .card .code-block { max-width: 100%; overflow-x: auto; }
+  .grid-2 { gap: 16px !important; }
+
+  /* ═══ DOCS PAGE — overflow containment ═══ */
+  .grid-sidebar > main { overflow-x: auto; max-width: 100vw; min-width: 0; }
+  .vtable { min-width: 500px; }
+  main .vtable { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .code-block { max-width: calc(100vw - 32px); overflow-x: auto; }
+  pre { max-width: 100%; overflow-x: auto; }
+
+  /* Navbar mobile */
+  .pill-nav { gap: 2px; padding: 3px; }
+  .pill-nav a, .pill-nav button { padding: 7px 12px; font-size: 0.75rem; }
+
+  .desktop-only { display: none !important; }
+  .mobile-only { display: flex !important; }
+
+  /* 3D scenes — handled via JS useBreakpoint */
+
+  /* Table responsive (for non-homepage tables) */
+  .vtable-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -16px; padding: 0 16px; }
+  .vtable { min-width: 600px; }
+  .vtable th { padding: 10px 14px; font-size: 0.65rem; }
+  .vtable td { padding: 12px 14px; font-size: 0.82rem; }
+
+  /* Code blocks */
+  .code-block { padding: 16px; font-size: 0.72rem; border-radius: 16px; }
+
+  /* Tabs smaller */
+  .tab { padding: 5px 12px; font-size: 0.72rem; }
+
+  /* Buttons */
+  .btn { padding: 10px 22px; font-size: 0.82rem; }
+
+  /* Tags */
+  .tag { padding: 3px 10px; font-size: 0.65rem; }
+
+  /* Footer stack */
+  footer .mx { flex-direction: column !important; gap: 12px !important; text-align: center; }
+}
+
+/* ═══ SMALL MOBILE — max 380px ═══ */
+@media (max-width: 380px) {
+  .mx { padding: 0 12px; }
+
+  h1 { font-size: 1.35rem !important; }
+
+  .pill-nav a, .pill-nav button {
+    padding: 6px 9px;
+    font-size: 0.68rem;
+  }
+
+  .grid-4 { grid-template-columns: 1fr !important; }
 }

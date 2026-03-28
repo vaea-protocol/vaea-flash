@@ -19,7 +19,7 @@ const USE_CASES = [
 
 const COMPARISONS = [
   { feature: 'Collateral Required', flash: 'None', traditional: '100-150%' },
-  { feature: 'Duration', flash: 'Same transaction (~400ms)', traditional: 'Days to months' },
+  { feature: 'Duration', flash: 'Same transaction (instant)', traditional: 'Days to months' },
   { feature: 'Risk of Loss', flash: 'Zero — reverts if fails', traditional: 'Full capital at risk' },
   { feature: 'Capital Needed', flash: '$0', traditional: 'Full loan amount' },
   { feature: 'Use Case', flash: 'Arbitrage, liquidation, swaps', traditional: 'Trading, holding' },
@@ -52,10 +52,10 @@ export default function LearnPage() {
         <p style={{ color: 'var(--text-2)', fontSize: '0.92rem', lineHeight: 1.8, marginBottom: 24 }}>
           On Solana, a flash loan happens inside a single <strong>atomic transaction</strong>. 
           &quot;Atomic&quot; means it either succeeds completely or fails completely — there is no in-between state.
-          The entire borrow-use-repay cycle takes about <strong>400 milliseconds</strong> (one Solana block).
+          The entire borrow-use-repay cycle executes inside a <strong>single atomic transaction</strong>.
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 40 }}>
+        <div className="grid-3" style={{ gap: 14, marginBottom: 40 }}>
           {STEPS.map((s, i) => (
             <div key={s.n} className="fade-in" style={{ animationDelay: `${i * 0.08}s` }}>
               <div style={{ background: `${s.color}08`, border: `1.5px solid ${s.color}25`, borderRadius: 20, padding: '24px 22px', height: '100%' }}>
@@ -81,7 +81,7 @@ export default function LearnPage() {
         <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: 20, paddingBottom: 10, borderBottom: '1px solid var(--border)' }}>
           What Can You Do With Flash Loans?
         </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 40 }}>
+        <div className="grid-2" style={{ gap: 14, marginBottom: 40 }}>
           {USE_CASES.map(uc => (
             <div key={uc.title} style={{ background: 'white', borderRadius: 20, padding: '22px 24px', border: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
@@ -97,6 +97,7 @@ export default function LearnPage() {
         <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: 20, paddingBottom: 10, borderBottom: '1px solid var(--border)' }}>
           Flash Loans vs Traditional Loans
         </h2>
+        <div className="vtable-wrap">
         <table className="vtable" style={{ marginBottom: 40 }}>
           <thead>
             <tr><th></th><th style={{ color: '#29C1A2' }}>⚡ Flash Loan</th><th>Traditional Loan</th></tr>
@@ -111,14 +112,15 @@ export default function LearnPage() {
             ))}
           </tbody>
         </table>
+        </div>
 
         {/* Why Solana */}
         <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: 20, paddingBottom: 10, borderBottom: '1px solid var(--border)' }}>
           Why Solana Is Ideal for Flash Loans
         </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 40 }}>
+        <div className="grid-3" style={{ gap: 14, marginBottom: 40 }}>
           {[
-            { title: '400ms Blocks', desc: 'Solana processes a block every 400ms — your flash loan completes in under a second.', icon: '⚡' },
+            { title: 'Sub-Second Blocks', desc: 'Solana processes blocks faster than any other chain — your flash loan confirms almost instantly.', icon: '⚡' },
             { title: '$0.0001 Fees', desc: 'Transaction fees are negligible. Failed flash loans cost virtually nothing.', icon: '💰' },
             { title: 'Atomic Transactions', desc: 'Solana transactions are all-or-nothing by design — perfect for flash loan safety.', icon: '🔗' },
           ].map(f => (

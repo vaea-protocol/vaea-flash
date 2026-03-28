@@ -182,6 +182,17 @@ export interface BorrowParams {
 export const VAEA_API_URL = 'https://api.vaea.fi';
 export const VAEA_PROGRAM_ID = new PublicKey('HoYiwkNB7a3gmZXEkTqLkborNDc976vKEUAzBm8YpK5E');
 
+/**
+ * Pre-loaded Address Lookup Table with VAEA fixed accounts:
+ *   [0] Config PDA:          27qrSQk6xUGtdMQmMobsQWCSts67jtXqA2gZzPK1wubQ
+ *   [1] Fee Vault PDA:       BQNpRH1kahoFqxu5tiZaQYuKb7p41o3cmyXrFWsDmYPn
+ *   [2] Sysvar Instructions: Sysvar1nstructions1111111111111111111111111
+ *   [3] System Program:      11111111111111111111111111111111
+ *
+ * Using this ALT saves ~124 bytes per transaction (4 accounts × 31 bytes each).
+ */
+export const VAEA_LOOKUP_TABLE = new PublicKey('DjncKSi9KqtnFx6hFYa7ARmwJ7B4Y7UH3XpR2XEuXNJr');
+
 export const SUPPORTED_TOKENS = [
   'SOL', 'USDC', 'USDT', 'JitoSOL', 'JupSOL', 'JUP', 'JLP', 'cbBTC',
   'mSOL', 'bSOL', 'INF', 'laineSOL', 'wETH',

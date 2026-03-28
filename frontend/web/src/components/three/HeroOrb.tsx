@@ -1,8 +1,34 @@
 'use client';
-import { useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Float, MeshTransmissionMaterial, Environment, Lightformer, MeshDistortMaterial } from '@react-three/drei';
+import { useRef, useEffect, useState } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Float, MeshTransmissionMaterial, Environment, Lightformer } from '@react-three/drei';
 import * as THREE from 'three';
+
+/* ═══ Responsive hook ═══ */
+function useBreakpoint() {
+  const [bp, setBp] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+  useEffect(() => {
+    const check = () => {
+      const w = window.innerWidth;
+      setBp(w <= 640 ? 'mobile' : w <= 1024 ? 'tablet' : 'desktop');
+    };
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+  return bp;
+}
+
+/* ═══ Auto-adjust camera for screen size ═══ */
+function ResponsiveCamera({ desktop, mobile }: { desktop: number; mobile: number }) {
+  const { camera, size } = useThree();
+  useEffect(() => {
+    const z = size.width <= 640 ? mobile : desktop;
+    (camera as THREE.PerspectiveCamera).position.z = z;
+    camera.updateProjectionMatrix();
+  }, [size.width, camera, desktop, mobile]);
+  return null;
+}
 
 function GlassTorus() {
   const ref = useRef<THREE.Mesh>(null);
@@ -57,14 +83,18 @@ function Capsule({ position, color, scaleX = 1, scaleY = 1, scaleZ = 1, rotation
 }
 
 export default function HeroScene() {
+  const bp = useBreakpoint();
+  const height = bp === 'mobile' ? 320 : bp === 'tablet' ? 460 : 640;
+
   return (
-    <div style={{ width: '100%', height: 640, pointerEvents: 'none' }}>
+    <div style={{ width: '100%', height, pointerEvents: 'none' }}>
       <Canvas
         camera={{ position: [0, 0, 8.5], fov: 50 }}
         gl={{ alpha: true, antialias: true }}
         style={{ background: 'transparent' }}
       >
         <color attach="background" args={['#FEF4EF']} />
+        <ResponsiveCamera desktop={8.5} mobile={11} />
         <ambientLight intensity={0.6} />
         <directionalLight intensity={0.8} position={[5, 5, 8]} />
 

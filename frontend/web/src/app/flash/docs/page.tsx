@@ -245,10 +245,10 @@ export default function DocsPage() {
   return (
     <div style={{ minHeight: '100vh' }}>
       <Navbar />
-      <div className="mx" style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 40, paddingTop: 32, paddingBottom: 80 }}>
+      <div className="mx grid-sidebar" style={{ gap: 40, paddingTop: 32, paddingBottom: 80 }}>
 
         {/* ═══ Sidebar ═══ */}
-        <aside style={{ position: 'sticky', top: 72, height: 'fit-content', maxHeight: 'calc(100vh - 90px)', overflowY: 'auto' }}>
+        <aside className="desktop-only" style={{ position: 'sticky', top: 72, height: 'fit-content', maxHeight: 'calc(100vh - 90px)', overflowY: 'auto', flexDirection: 'column' }}>
           {NAV.map(g => (
             <div key={g.group} style={{ marginBottom: 20 }}>
               <div style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.1em', padding: '0 12px', marginBottom: 6 }}>
@@ -277,6 +277,25 @@ export default function DocsPage() {
           </div>
         </aside>
 
+        {/* ═══ Mobile Section Selector ═══ */}
+        <div className="mobile-only" style={{ marginBottom: 20, flexDirection: 'column' }}>
+          <select
+            value={section}
+            onChange={e => setSection(e.target.value)}
+            style={{
+              width: '100%', padding: '12px 16px', borderRadius: 16,
+              border: '1.5px solid var(--border)', background: 'white',
+              fontFamily: 'Outfit, sans-serif', fontSize: '0.88rem', fontWeight: 700,
+              color: 'var(--text)', outline: 'none', cursor: 'pointer',
+              appearance: 'auto',
+            }}
+          >
+            {NAV.map(g => g.items.map(item => (
+              <option key={item.id} value={item.id}>{g.group} — {item.label}</option>
+            )))}
+          </select>
+        </div>
+
         {/* ═══ Content ═══ */}
         <main className="fade-in" key={section} style={{ maxWidth: 720, minWidth: 0 }}>
 
@@ -285,7 +304,7 @@ export default function DocsPage() {
             <H1>Introduction</H1>
             <P>{OVERVIEW_CONTENT.intro}</P>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 32 }}>
+            <div className="grid-4" style={{ gap: 10, marginBottom: 32 }}>
               {OVERVIEW_CONTENT.stats.map(s => (
                 <div key={s.label} style={{ background: 'white', borderRadius: 16, padding: '16px 14px', border: '1px solid var(--border)', textAlign: 'center' }}>
                   <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>{s.value}</div>
@@ -295,7 +314,7 @@ export default function DocsPage() {
             </div>
 
             <H2>The Problem</H2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
+            <div className="grid-2" style={{ gap: 10, marginBottom: 24 }}>
               {OVERVIEW_CONTENT.whyExists.map(w => (
                 <div key={w.problem} style={{ background: 'white', borderRadius: 16, padding: '16px 18px', border: '1px solid var(--border)' }}>
                   <div style={{ fontSize: '0.78rem', color: 'var(--coral)', fontWeight: 700, marginBottom: 6 }}>✗ {w.problem}</div>
@@ -305,7 +324,7 @@ export default function DocsPage() {
             </div>
 
             <H2>Who Is It For?</H2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="grid-2" style={{ gap: 12 }}>
               {OVERVIEW_CONTENT.audiences.map(a => (
                 <div key={a.title} style={{ background: 'white', borderRadius: 16, padding: '18px 20px', border: '1px solid var(--border)', display: 'flex', gap: 14 }}>
                   <span style={{ fontSize: '1.4rem' }}>{a.icon}</span>
@@ -378,7 +397,7 @@ export default function DocsPage() {
 
             <H2>Direct Route</H2>
             <P>The token is natively available as a flash loan from a lending protocol. Fastest and cheapest.</P>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
               {['Lending Protocol', '→', 'Token', '→', 'Your Wallet'].map((s, i) => (
                 <div key={i} style={s === '→' ? { color: 'var(--text-3)', fontSize: '1rem' } : { background: '#29C1A210', border: '1.5px solid #29C1A230', borderRadius: 12, padding: '10px 18px', fontWeight: 700, fontSize: '0.82rem' }}>
                   {s}
@@ -418,7 +437,7 @@ export default function DocsPage() {
             <H1>Fees & Pricing</H1>
             <P>Transparent, predictable fees on top of underlying protocol costs.</P>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 28 }}>
+            <div className="grid-2" style={{ gap: 14, marginBottom: 28 }}>
               <div style={{ background: '#29C1A208', borderRadius: 20, padding: 24, border: '1.5px solid #29C1A230' }}>
                 <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#29C1A2', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Direct Route</div>
                 <div style={{ fontSize: '2rem', fontWeight: 900, marginBottom: 4 }}>0.03%</div>
