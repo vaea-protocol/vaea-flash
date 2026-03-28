@@ -315,6 +315,93 @@ export default function FlashDashboard() {
             </div>
           </div>
 
+          {/* — SDK Features — */}
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <div className="tag tag-purple" style={{ marginBottom: 14 }}>SDK Features</div>
+            <h2 style={{ fontSize: 'clamp(1.4rem, 3.5vw, 1.9rem)', marginBottom: 12 }}>Everything You Need, Built In</h2>
+            <p style={{ color: 'var(--text-2)', fontSize: '0.95rem', lineHeight: 1.8, maxWidth: 560, margin: '0 auto' }}>
+              Production-grade tools for bots, liquidators, and DeFi protocols — zero external dependencies.
+            </p>
+          </div>
+
+          <div className="grid-3" style={{ gap: 14, marginBottom: 64 }}>
+            {[
+              { icon: '⚡', title: 'Turbo Mode', desc: 'Build instructions 100% locally in ~91µs. No API call, no HTTP, no network. 2,000× faster than standard SDK round-trips.', color: '#FF9060', link: '/flash/docs/turbo-mode' },
+              { icon: '🔬', title: 'Simulation', desc: 'Dry-run any flash loan without risking SOL. Get exact compute units, logs, and error details before sending.', color: '#29C1A2', link: '/flash/docs/simulation' },
+              { icon: '🔗', title: 'Multi-Token Flash', desc: 'Borrow multiple tokens in a single atomic TX with nested sandwich patterns. Cross-token arbitrage made simple.', color: '#823FFF', link: '/flash/docs/multi-token-flash' },
+              { icon: '📊', title: 'Profitability Check', desc: 'Estimate all costs — VAEA fee, swap fees, priority fee, Jito tip — and get a send/wait/abort recommendation before executing.', color: '#29C1A2', link: '/flash/docs/profitability-check' },
+              { icon: '🔄', title: 'Smart Retry', desc: 'Automatic retry with blockhash refresh and adaptive priority fee escalation. Classifies errors to only retry transient failures.', color: '#FF718F', link: '/flash/docs/smart-retry' },
+              { icon: '🛡️', title: 'Jito Bundles', desc: 'Send flash loans as private bundles via Jito Block Engine. Your TX stays invisible to MEV bots — zero mempool exposure.', color: '#8ECAE6', link: '/flash/docs/jito-bundles' },
+              { icon: '🔥', title: 'Warm Cache', desc: 'Background poller keeps capacity data hot. Eliminates cold-start penalty — first call is instant for latency-critical bots.', color: '#FF9060', link: '/flash/docs/warm-cache' },
+              { icon: '🚧', title: 'Fee Guard', desc: 'Set a max fee threshold with maxFeeBps. If the fee exceeds your limit, the SDK auto-rejects before sending the TX.', color: '#823FFF', link: '/flash/docs/fee-guard' },
+              { icon: '🎯', title: 'Auto Slippage', desc: 'Dynamic slippage calculation per route type and price impact. Three modes: auto, aggressive, and safe — no manual tuning.', color: '#FF718F', link: '/flash/docs/auto-slippage' },
+            ].map((f, i) => (
+              <Link key={f.title} href={f.link} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div className="card fade-in" style={{ animationDelay: `${i * 0.06}s`, border: `1.5px solid ${f.color}20`, padding: '24px 22px', height: '100%', transition: 'border-color 0.2s, transform 0.2s', cursor: 'pointer' }}
+                  onMouseOver={e => { (e.currentTarget as HTMLElement).style.borderColor = `${f.color}60`; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; }}
+                  onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderColor = `${f.color}20`; (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                    <span style={{ fontSize: '1.4rem' }}>{f.icon}</span>
+                    <h3 style={{ fontSize: '0.95rem', fontWeight: 800 }}>{f.title}</h3>
+                  </div>
+                  <p style={{ color: 'var(--text-2)', fontSize: '0.82rem', lineHeight: 1.7, margin: 0 }}>{f.desc}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* — Coming Soon — R&D — */}
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <div style={{ display: 'inline-flex', padding: '5px 14px', borderRadius: 'var(--r-full, 999px)', background: '#823FFF10', color: '#823FFF', fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>R&D — Coming Soon</div>
+            <h2 style={{ fontSize: 'clamp(1.4rem, 3.5vw, 1.9rem)', marginBottom: 12 }}>What&apos;s Next for VAEA Flash</h2>
+            <p style={{ color: 'var(--text-2)', fontSize: '0.95rem', lineHeight: 1.8, maxWidth: 560, margin: '0 auto' }}>
+              Two innovations in active development that will redefine flash loans on Solana.
+            </p>
+          </div>
+
+          <div className="grid-2" style={{ gap: 20, marginBottom: 64 }}>
+            <div style={{ background: 'linear-gradient(135deg, #823FFF06 0%, #29C1A206 100%)', border: '1.5px solid #823FFF20', borderRadius: 24, padding: '32px 28px', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: 16, right: 20, padding: '3px 10px', borderRadius: 999, background: '#823FFF15', color: '#823FFF', fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em' }}>In Development</div>
+              <div style={{ fontSize: '1.6rem', marginBottom: 12 }}>🔌</div>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: 10 }}>Zero-CPI Integration</h3>
+              <p style={{ color: 'var(--text-2)', fontSize: '0.85rem', lineHeight: 1.8, marginBottom: 16 }}>
+                Any Solana protocol will be able to verify it&apos;s inside a VAEA flash loan <strong>without consuming any CPI depth</strong>.
+                A single PDA read + instruction introspection — zero CPI calls, saving one full depth level.
+              </p>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-2)', lineHeight: 1.7, marginBottom: 14 }}>
+                <strong style={{ color: 'var(--text)' }}>Why it matters:</strong> Solana has a hard CPI depth limit of 4.
+                Classic CPI flash loans consume 1-2 levels, blocking complex operations like Jupiter swaps through nested AMMs.
+                Zero-CPI saves that entire level.
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <span className="tag tag-purple">PDA Introspection</span>
+                <span className="tag tag-default">Zero overhead</span>
+                <span className="tag tag-default">crates.io crate</span>
+              </div>
+            </div>
+
+            <div style={{ background: 'linear-gradient(135deg, #29C1A206 0%, #FF718F06 100%)', border: '1.5px solid #29C1A220', borderRadius: 24, padding: '32px 28px', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: 16, right: 20, padding: '3px 10px', borderRadius: 999, background: '#29C1A215', color: '#29C1A2', fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Planned</div>
+              <div style={{ fontSize: '1.6rem', marginBottom: 12 }}>✨</div>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: 10 }}>vSOL — Unlimited Flash Loans</h3>
+              <p style={{ color: 'var(--text-2)', fontSize: '0.85rem', lineHeight: 1.8, marginBottom: 16 }}>
+                A fundamentally new approach: <strong>mint synthetic vSOL</strong> during a flash loan, <strong>burn at the end</strong> — net supply change = 0.
+                No pool to drain, no congestion, unlimited capacity.
+              </p>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-2)', lineHeight: 1.7, marginBottom: 14 }}>
+                <strong style={{ color: 'var(--text)' }}>Why it matters:</strong> During a market crash, pool-based flash loans drain instantly.
+                With mint/burn, 200 bots can execute 10M SOL of flash loans in a single block with zero contention.
+                VAEA becomes the source of liquidity, not just an aggregator.
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <span className="tag tag-emerald">Zero congestion</span>
+                <span className="tag tag-default">Backwards compatible</span>
+                <span className="tag tag-default">Yield-bearing LST</span>
+              </div>
+            </div>
+          </div>
+
           {/* — CTA — */}
           <div style={{ textAlign: 'center', padding: '0 0 64px' }}>
             <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', marginBottom: 12 }}>Start Building with Flash Loans</h2>

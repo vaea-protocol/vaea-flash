@@ -302,7 +302,7 @@ Test your flash loan transaction without risking any SOL. Uses Solana's `simulat
 const result = await flash.simulate({
   token: 'SOL',
   amount: 1000,
-  onFunds: async () => [myArbIx],
+  instructions: [myArbIx],  // TransactionInstruction[]
 });
 
 console.log(result.success);       // true/false
@@ -385,7 +385,7 @@ const sig = await flash.execute({
 }, {
   retry: {
     maxAttempts: 3,
-    strategy: 'escalate',  // priority fee x1.5 each retry
+    strategy: 'adaptive',  // priority fee x1.5 each retry
   },
   priorityMicroLamports: 1000,
 });
@@ -610,7 +610,7 @@ async function main() {
         return ixs;
       },
     }, {
-      retry: { maxAttempts: 3, strategy: 'escalate' },
+      retry: { maxAttempts: 3, strategy: 'adaptive' },
       priorityMicroLamports: 1000,
     });
 
@@ -641,6 +641,51 @@ main();
 - **Fee floor protection** — minimum 1 lamport fee prevents micro-loan evasion
 - **Strict authority checks** — `require!` enforced on all admin operations
 - PDA seeds include `token_mint` — prevents cross-token PDA collisions in multi-flash
+---
+
+## Roadmap
+
+| Phase | Status | Description |
+|---|---|---|
+| **V1 Beta** | ✅ Live (Devnet) | Flash loans via protocol aggregation — 27 tokens, 3 SDKs, REST API, dashboard |
+| **Mainnet Launch** | 🔜 April 2026 | Production deployment, audit, public launch |
+| **Zero-CPI Integration** | 🔬 In Development | Protocol-level flash loan verification without CPI overhead |
+| **vSOL V2** | 📋 Planned | Unlimited flash loans via synthetic mint/burn — zero congestion |
+
+---
+
+## Coming Soon
+
+### 🔌 Zero-CPI Protocol Integration
+
+A new pattern that allows any Solana protocol to **verify it's inside a VAEA flash loan without consuming any CPI depth**. Protocols simply read the VAEA `FlashState` PDA + perform instruction introspection — zero CPI calls to VAEA.
+
+**Why it matters:** Solana has a hard CPI depth limit of 4. Classic CPI flash loans consume 1-2 levels, leaving protocols unable to perform complex operations (Jupiter swaps through AMMs). Our Zero-CPI pattern saves **1 full CPI level**, making synthetic routes and nested protocol calls viable.
+
+```rust
+// Inside your protocol — zero CPI to VAEA
+let flash = vaea_flash_ctx::verify(&ctx.accounts.flash_state, &ctx.accounts.sysvar_ix)?;
+// flash.amount, flash.token_mint, flash.fee — all verified, zero overhead
+```
+
+A `vaea-flash-ctx` crate will be published on **crates.io** for easy integration.
+
+### ✨ vSOL — Unlimited Flash Loans
+
+A fundamentally new approach that eliminates congestion and removes dependence on third-party lending protocols. Instead of borrowing from pools, VAEA will **mint synthetic vSOL** during a flash loan and **burn it at the end** — net supply change = 0.
+
+**Why it matters:** During a market crash, pool-based flash loans drain instantly. With mint/burn, every transaction creates its own tokens — **200 bots can execute 10M SOL of flash loans in a single block** with zero contention.
+
+| | Pool-based (V1) | Mint/Burn (V2) |
+|---|---|---|
+| **Capacity** | Limited by pool size | Unlimited ($100M cap/TX) |
+| **Congestion** | Drains under load | Zero — each TX independent |
+| **Dependencies** | Marginfi, Kamino, Save | None — VAEA is the source |
+| **Security** | Atomic repayment | Atomic burn + same-slot enforcement |
+
+vSOL will also be a **yield-bearing LST** via Sanctum, listed on Jupiter, usable as collateral — giving holders staking yield + flash loan fee share.
+
+> **Note:** vSOL V2 will be **backwards compatible**. The SDK API stays the same — `executeLocal()` will automatically use the vSOL path when available. No code changes needed.
 
 ---
 

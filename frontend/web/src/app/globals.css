@@ -1,6 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
+/* ── Hide scrollbars in docs (sidebar + content) ── */
+.docs-no-scrollbar::-webkit-scrollbar { display: none; }
+.docs-no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+
 /* ═══════════════════════════════════════════════
    VAEA Flash — Design System v3
    Warm / Artistic / Premium
