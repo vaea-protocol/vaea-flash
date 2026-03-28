@@ -58,8 +58,8 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/Logo_noire.png",
-    apple: "/Logo_noire.png",
+    icon: "/favicon.png",
+    apple: "/favicon.png",
   },
 };
 
