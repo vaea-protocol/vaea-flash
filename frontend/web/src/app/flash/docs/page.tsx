@@ -1,12 +1,86 @@
 'use client';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import {
   SECTIONS, OVERVIEW_CONTENT, QUICKSTART, TOKENS_DIRECT, TOKENS_SYNTHETIC,
   API_ENDPOINTS, ERRORS, FAQ,
   TURBO_MODE, SIMULATE, MULTI_FLASH, PROFITABILITY, SMART_RETRY,
-  JITO_BUNDLES,
+  JITO_BUNDLES, WARM_CACHE, FEE_GUARD, SLIPPAGE_CONTROL,
 } from './content';
+
+/* ═══════════════════════════════════════════════
+   Shared helper: renders sections, multi-SDK code, useCases, tips
+   ═══════════════════════════════════════════════ */
+
+function FeatureSections({ data }: { data: { sections?: { heading: string; paragraphs: string[] }[] } }) {
+  if (!data.sections) return null;
+  return <>{data.sections.map((s, i) => (
+    <div key={i} style={{ marginBottom: 24 }}>
+      <H2>{s.heading}</H2>
+      {s.paragraphs.map((p, j) => <P key={j}>{p}</P>)}
+    </div>
+  ))}</>;
+}
+
+function MultiCode({ code }: { code: { typescript: string; rust?: string; python?: string } }) {
+  const [tab, setTab] = React.useState<'typescript' | 'rust' | 'python'>('typescript');
+  const tabs = [
+    { key: 'typescript' as const, label: 'TypeScript' },
+    ...(code.rust ? [{ key: 'rust' as const, label: 'Rust' }] : []),
+    ...(code.python ? [{ key: 'python' as const, label: 'Python' }] : []),
+  ];
+  return (
+    <div style={{ marginBottom: 24 }}>
+      <div style={{ display: 'flex', gap: 0, marginBottom: 0 }}>
+        {tabs.map(t => (
+          <button key={t.key} onClick={() => setTab(t.key)}
+            style={{
+              padding: '8px 18px', border: 'none', cursor: 'pointer',
+              background: tab === t.key ? '#1a1a1a' : 'transparent',
+              color: tab === t.key ? '#29C1A2' : 'var(--text-3)',
+              fontWeight: tab === t.key ? 800 : 500, fontSize: '0.78rem',
+              borderRadius: '12px 12px 0 0', fontFamily: "'SF Mono', monospace",
+            }}>{t.label}</button>
+        ))}
+      </div>
+      <Code code={code[tab] ?? code.typescript} lang={tab === 'typescript' ? 'typescript' : tab} />
+    </div>
+  );
+}
+
+function UseCases({ items }: { items?: { title: string; desc: string }[] }) {
+  if (!items?.length) return null;
+  return (
+    <div style={{ marginBottom: 24 }}>
+      <H2>Real-World Use Cases</H2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
+        {items.map(u => (
+          <div key={u.title} style={{ background: 'var(--bg)', borderRadius: 16, padding: 16, border: '1.5px solid var(--border)' }}>
+            <div style={{ fontWeight: 800, fontSize: '0.88rem', marginBottom: 6 }}>{u.title}</div>
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-2)', lineHeight: 1.5 }}>{u.desc}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Tips({ items }: { items?: string[] }) {
+  if (!items?.length) return null;
+  return (
+    <div style={{ marginBottom: 24 }}>
+      <H3>Pro Tips</H3>
+      {items.map((t, i) => (
+        <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 8, fontSize: '0.85rem' }}>
+          <span style={{ color: '#29C1A2', fontWeight: 700, flexShrink: 0 }}>💡</span>
+          <span style={{ color: 'var(--text-2)' }}>{t}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ... (rest of page component below, only feature sections shown here) ... */
 
 /* ═══════════════════════════════════════════════
    Design System Components — Fumadocs/Mintlify inspired
@@ -435,37 +509,13 @@ export default function DocsPage() {
           </>)}
 
           {/* ─── FEES ─── */}
-          {section === 'fees' && (<>
-            <H1>Fees & Pricing</H1>
-            <P>Transparent, predictable fees on top of underlying protocol costs.</P>
 
-            <div className="grid-2" style={{ gap: 14, marginBottom: 28 }}>
-              <div style={{ background: '#29C1A208', borderRadius: 20, padding: 24, border: '1.5px solid #29C1A230' }}>
-                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#29C1A2', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Direct Route</div>
-                <div style={{ fontSize: '2rem', fontWeight: 900, marginBottom: 4 }}>0.03%</div>
-                <P>Source fee (0%) + VAEA fee (0.03%). No hidden costs.</P>
-              </div>
-              <div style={{ background: '#823FFF08', borderRadius: 20, padding: 24, border: '1.5px solid #823FFF30' }}>
-                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#823FFF', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Synthetic Route</div>
-                <div style={{ fontSize: '2rem', fontWeight: 900, marginBottom: 4 }}>~0.09%</div>
-                <P>Source (0%) + swap round-trip (~0.06%) + VAEA (0.03%).</P>
-              </div>
-            </div>
-
-            <Callout type="tip">Use <code>maxFeeBps</code> in your SDK calls to automatically reject transactions where the fee exceeds your threshold.</Callout>
-
-            <H2>Interactive Calculator</H2>
-            <FeeCalc />
-
-            <H2>Fee Breakdown Example</H2>
-            <Code code={`Borrow: 10,000 mSOL via synthetic route\n  SOL needed:          ~10,050 SOL\n  Source fee (Jupiter):  0%     =  0 SOL\n  Swap SOL → mSOL:     ~0.03% =  ~3 SOL\n  Swap mSOL → SOL:     ~0.03% =  ~3 SOL\n  VAEA fee:             0.03% =  ~3 SOL\n  ─────────────────────────────────────\n  Total cost:           ~9 SOL (~0.09%)`} />
-          </>)}
 
           {/* ─── TURBO MODE ─── */}
           {section === 'turbo' && (<>
             <H1>🚀 {TURBO_MODE.title}</H1>
             <P>{TURBO_MODE.tagline}</P>
-            <P>{TURBO_MODE.description}</P>
+            <FeatureSections data={TURBO_MODE} />
 
             <H2>Latency Comparison</H2>
             <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 24, fontSize: '0.88rem' }}>
@@ -485,43 +535,48 @@ export default function DocsPage() {
               </tbody>
             </table>
 
-            <H2>Usage</H2>
-            <Code code={TURBO_MODE.code} lang="typescript" />
-
-            <Callout type="tip">Turbo Mode works <strong>offline</strong> — it doesn&apos;t depend on the VAEA API at all. Only the Solana RPC connection is needed to send the transaction.</Callout>
+            <H2>Code Examples</H2>
+            <MultiCode code={TURBO_MODE.code} />
+            <UseCases items={TURBO_MODE.useCases} />
+            <Tips items={TURBO_MODE.tips} />
           </>)}
 
           {/* ─── SIMULATION ─── */}
           {section === 'simulate' && (<>
             <H1>🔬 {SIMULATE.title}</H1>
             <P>{SIMULATE.tagline}</P>
-            <P>{SIMULATE.description}</P>
-            <Code code={SIMULATE.code} lang="typescript" />
-            <Callout type="info">Simulation uses <code>sigVerify: false</code> — you don&apos;t need to sign the transaction to simulate it.</Callout>
+            <FeatureSections data={SIMULATE} />
+            <H2>Code Examples</H2>
+            <MultiCode code={SIMULATE.code} />
+            <UseCases items={SIMULATE.useCases} />
+            <Tips items={SIMULATE.tips} />
           </>)}
 
           {/* ─── MULTI-FLASH ─── */}
           {section === 'multiflash' && (<>
             <H1>⚡ {MULTI_FLASH.title}</H1>
             <P>{MULTI_FLASH.tagline}</P>
-            <P>{MULTI_FLASH.description}</P>
+            <FeatureSections data={MULTI_FLASH} />
 
             <H2>Transaction Pattern</H2>
             <div style={{ background: '#1a1a1a', borderRadius: 16, padding: '16px 20px', marginBottom: 20, fontFamily: "'SF Mono', monospace", fontSize: '0.82rem', color: '#e0e0e0', overflowX: 'auto' }}>
               {MULTI_FLASH.pattern}
             </div>
 
-            <H2>Usage</H2>
-            <Code code={MULTI_FLASH.code} lang="typescript" />
-            <Callout type="tip">Each token gets its own PDA: <code>[&quot;flash&quot;, payer, token_mint]</code>. No collision between simultaneous loans.</Callout>
+            <H2>Code Examples</H2>
+            <MultiCode code={MULTI_FLASH.code} />
+            <UseCases items={MULTI_FLASH.useCases} />
+            <Tips items={MULTI_FLASH.tips} />
           </>)}
 
           {/* ─── PROFITABILITY ─── */}
           {section === 'profitability' && (<>
             <H1>📊 {PROFITABILITY.title}</H1>
             <P>{PROFITABILITY.tagline}</P>
-            <P>{PROFITABILITY.description}</P>
-            <Code code={PROFITABILITY.code} lang="typescript" />
+            <FeatureSections data={PROFITABILITY} />
+            <H2>Code Examples</H2>
+            <MultiCode code={PROFITABILITY.code} />
+
             <H3>Recommendations</H3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 20 }}>
               {[
@@ -536,14 +591,17 @@ export default function DocsPage() {
                 </div>
               ))}
             </div>
+            <UseCases items={PROFITABILITY.useCases} />
+            <Tips items={PROFITABILITY.tips} />
           </>)}
 
           {/* ─── SMART RETRY ─── */}
           {section === 'retry' && (<>
             <H1>🔄 {SMART_RETRY.title}</H1>
             <P>{SMART_RETRY.tagline}</P>
-            <P>{SMART_RETRY.description}</P>
-            <Code code={SMART_RETRY.code} lang="typescript" />
+            <FeatureSections data={SMART_RETRY} />
+            <H2>Code Examples</H2>
+            <MultiCode code={SMART_RETRY.code} />
 
             <H2>Error Classification</H2>
             <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 24, fontSize: '0.88rem' }}>
@@ -562,15 +620,17 @@ export default function DocsPage() {
                 ))}
               </tbody>
             </table>
-            <Callout type="warn">Program errors (your logic bugs) are <strong>never retried</strong>. This prevents wasting SOL on transactions that will always fail.</Callout>
+            <UseCases items={SMART_RETRY.useCases} />
+            <Tips items={SMART_RETRY.tips} />
           </>)}
 
           {/* ─── JITO BUNDLES ─── */}
           {section === 'jito' && (<>
             <H1>🔗 {JITO_BUNDLES.title}</H1>
             <P>{JITO_BUNDLES.tagline}</P>
-            <P>{JITO_BUNDLES.description}</P>
-            <Code code={JITO_BUNDLES.code} lang="typescript" />
+            <FeatureSections data={JITO_BUNDLES} />
+            <H2>Code Examples</H2>
+            <MultiCode code={JITO_BUNDLES.code} />
 
             <H2>Tip Strategies</H2>
             <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 24, fontSize: '0.88rem' }}>
@@ -610,10 +670,66 @@ export default function DocsPage() {
               ))}
             </div>
 
-            <Callout type="warn">Jito Block Engine is <strong>mainnet only</strong>. There is no Jito devnet. Bundle tests require mainnet SOL.</Callout>
+            <UseCases items={JITO_BUNDLES.useCases} />
+            <Tips items={JITO_BUNDLES.tips} />
           </>)}
 
-          {/* ─── API REFERENCE ─── */}
+          {/* ─── WARM CACHE ─── */}
+          {section === 'warmcache' && (<>
+            <H1>🔥 {WARM_CACHE.title}</H1>
+            <P>{WARM_CACHE.tagline}</P>
+            <FeatureSections data={WARM_CACHE} />
+            <H2>Code Examples</H2>
+            <MultiCode code={WARM_CACHE.code} />
+            <Tips items={WARM_CACHE.tips} />
+          </>)}
+
+          {/* ─── FEE GUARD ─── */}
+          {section === 'feeguard' && (<>
+            <H1>🛡️ {FEE_GUARD.title}</H1>
+            <P>{FEE_GUARD.tagline}</P>
+            <FeatureSections data={FEE_GUARD} />
+            <H2>Code Examples</H2>
+            <MultiCode code={FEE_GUARD.code} />
+            <Tips items={FEE_GUARD.tips} />
+          </>)}
+
+          {/* ─── SLIPPAGE ─── */}
+          {section === 'slippage' && (<>
+            <H1>🎯 {SLIPPAGE_CONTROL.title}</H1>
+            <P>{SLIPPAGE_CONTROL.tagline}</P>
+            <FeatureSections data={SLIPPAGE_CONTROL} />
+            <H2>Code Examples</H2>
+            <MultiCode code={SLIPPAGE_CONTROL.code} />
+            <Tips items={SLIPPAGE_CONTROL.tips} />
+          </>)}
+
+          {section === 'fees' && (<>
+            <H1>Fees & Pricing</H1>
+            <P>Transparent, predictable fees on top of underlying protocol costs.</P>
+
+            <div className="grid-2" style={{ gap: 14, marginBottom: 28 }}>
+              <div style={{ background: '#29C1A208', borderRadius: 20, padding: 24, border: '1.5px solid #29C1A230' }}>
+                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#29C1A2', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Direct Route</div>
+                <div style={{ fontSize: '2rem', fontWeight: 900, marginBottom: 4 }}>0.03%</div>
+                <P>Source fee (0%) + VAEA fee (0.03%). No hidden costs.</P>
+              </div>
+              <div style={{ background: '#823FFF08', borderRadius: 20, padding: 24, border: '1.5px solid #823FFF30' }}>
+                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#823FFF', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Synthetic Route</div>
+                <div style={{ fontSize: '2rem', fontWeight: 900, marginBottom: 4 }}>~0.09%</div>
+                <P>Source (0%) + swap round-trip (~0.06%) + VAEA (0.03%).</P>
+              </div>
+            </div>
+
+            <Callout type="tip">Use <code>maxFeeBps</code> in your SDK calls to automatically reject transactions where the fee exceeds your threshold.</Callout>
+
+            <H2>Interactive Calculator</H2>
+            <FeeCalc />
+
+            <H2>Fee Breakdown Example</H2>
+            <Code code={`Borrow: 10,000 mSOL via synthetic route\n  SOL needed:          ~10,050 SOL\n  Source fee (Jupiter):  0%     =  0 SOL\n  Swap SOL → mSOL:     ~0.03% =  ~3 SOL\n  Swap mSOL → SOL:     ~0.03% =  ~3 SOL\n  VAEA fee:             0.03% =  ~3 SOL\n  ─────────────────────────────────────\n  Total cost:           ~9 SOL (~0.09%)`} />
+          </>)}
+
           {section === 'api' && (<>
             <H1>REST API</H1>
             <P>Base URL: <code style={{ padding: '3px 8px', background: 'var(--bg)', borderRadius: 8, fontWeight: 700 }}>https://api.vaea.fi</code> — All endpoints return JSON. No authentication required.</P>
