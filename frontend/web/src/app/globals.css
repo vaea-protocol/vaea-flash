@@ -473,3 +473,121 @@ h1, h2, h3, h4 {
 
   .grid-4 { grid-template-columns: 1fr !important; }
 }
+
+/* ═══════════════════════════════════════════════════ */
+/* ═══ DOCS LAYOUT — RESPONSIVE                  ═══ */
+/* ═══════════════════════════════════════════════════ */
+
+/* ── Desktop defaults ── */
+.docs-sidebar-wrapper {
+  display: flex;
+  flex-shrink: 0;
+}
+.docs-toc-column {
+  display: flex;
+  padding: 20px 24px 36px 0;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 230px;
+}
+.docs-mobile-header {
+  display: none; /* hidden on desktop */
+}
+.docs-sidebar-backdrop {
+  display: none;
+}
+
+/* ── Tablet — hide ToC, shrink sidebar ── */
+@media (max-width: 1024px) {
+  .docs-toc-column { display: none !important; }
+}
+
+/* ── Mobile — sidebar becomes overlay ── */
+@media (max-width: 640px) {
+  /* Mobile header bar */
+  .docs-mobile-header {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: white;
+    z-index: 50;
+  }
+  .docs-mobile-hamburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    color: var(--text);
+    flex-shrink: 0;
+  }
+  .docs-mobile-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Sidebar — hidden by default, slide-in overlay */
+  .docs-sidebar-wrapper {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: 100;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+  }
+  .docs-sidebar-wrapper.docs-sidebar-open {
+    display: flex;
+  }
+  .docs-sidebar-wrapper aside {
+    width: 100% !important;
+  }
+
+  /* Backdrop */
+  .docs-sidebar-backdrop {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 99;
+  }
+
+  /* ToC — already hidden */
+  .docs-toc-column { display: none !important; }
+
+  /* Doc main — full width, smaller padding */
+  .docs-main {
+    padding: 20px 16px 60px !important;
+  }
+
+  /* Doc tables — horizontal scroll */
+  .docs-main table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Code blocks — prevent overflow */
+  .docs-main pre,
+  .docs-main .code-block {
+    max-width: calc(100vw - 32px);
+    overflow-x: auto;
+    font-size: 0.72rem;
+  }
+
+  /* Prev/Next buttons — stack vertically */
+  .docs-main > div > div:last-child {
+    flex-direction: column !important;
+  }
+}

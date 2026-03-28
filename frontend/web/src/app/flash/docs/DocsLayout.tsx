@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from './components/Sidebar';
@@ -10,6 +11,7 @@ import { ALL_PAGES } from './nav';
 export default function DocsLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const currentSlug = pathname.split('/').pop() || 'introduction';
   const currentPage = ALL_PAGES.find(p => p.slug === currentSlug);
   const currentIdx = ALL_PAGES.findIndex(p => p.slug === currentSlug);
@@ -22,17 +24,41 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
       {/* ═══ App Navbar (64px) ═══ */}
       <Navbar />
 
+      {/* ═══ Mobile docs header — hamburger + page title ═══ */}
+      <div className="docs-mobile-header">
+        <button
+          className="docs-mobile-hamburger"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label="Toggle menu"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            {sidebarOpen
+              ? <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>
+              : <><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></>
+            }
+          </svg>
+        </button>
+        <span className="docs-mobile-title">{currentPage?.icon} {currentPage?.title || 'Documentation'}</span>
+      </div>
+
       {/* ═══ Docs body — fills remaining height ═══ */}
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
 
-        {/* ═══ Sidebar (gauche) — never scrolls with content ═══ */}
-        <Sidebar />
+        {/* ═══ Sidebar (gauche) — desktop: always visible, mobile: overlay ═══ */}
+        <div className={`docs-sidebar-wrapper ${sidebarOpen ? 'docs-sidebar-open' : ''}`}>
+          <Sidebar onNavigate={() => setSidebarOpen(false)} />
+        </div>
+
+        {/* ═══ Mobile overlay backdrop ═══ */}
+        {sidebarOpen && (
+          <div className="docs-sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
+        )}
 
         {/* ═══ Center + Right column ═══ */}
         <div style={{ flex: 1, minWidth: 0, display: 'flex', minHeight: 0 }}>
 
             {/* Center — ONLY this scrolls */}
-            <main className="docs-no-scrollbar" style={{ flex: 1, minWidth: 0, overflowY: 'auto', padding: '36px 40px 80px' }}>
+            <main className="docs-no-scrollbar docs-main" style={{ flex: 1, minWidth: 0, overflowY: 'auto', padding: '36px 40px 80px' }}>
               <div style={{ maxWidth: 760, margin: '0 auto' }}>
                 {children}
 
@@ -71,8 +97,8 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
               </div>
             </main>
 
-            {/* Right — Search + Table of Contents */}
-            <div className="desktop-only" style={{ padding: '20px 24px 36px 0', flexDirection: 'column', flexShrink: 0, width: 230 }}>
+            {/* Right — Search + Table of Contents (desktop only) */}
+            <div className="docs-toc-column">
               <SearchBar />
               {currentPage && (
                 <div style={{ marginTop: 24 }}>

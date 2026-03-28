@@ -2,7 +2,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { NAV } from '../nav';
 
-export default function Sidebar() {
+export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const current = pathname.split('/').pop() || 'introduction';
@@ -39,7 +39,7 @@ export default function Sidebar() {
               return (
                 <button
                   key={page.slug}
-                  onClick={() => router.push(`/flash/docs/${page.slug}`)}
+                  onClick={() => { router.push(`/flash/docs/${page.slug}`); onNavigate?.(); }}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 8, width: '100%',
                     padding: '8px 20px', border: 'none', cursor: 'pointer',
