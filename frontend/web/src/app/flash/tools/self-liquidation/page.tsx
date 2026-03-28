@@ -1,10 +1,6 @@
 'use client';
-import { Suspense } from 'react';
-import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
-
-const ShieldOrb = dynamic(() => import('@/components/three/ToolShapes').then(m => ({ default: m.ShieldOrb })), { ssr: false });
 
 const STEPS = [
   { n: '01', label: 'Detect low health factor', desc: 'Monitor your position — when health factor drops below your threshold, trigger self-liquidation.' },
@@ -45,10 +41,28 @@ export default function SelfLiquidationPage() {
             </div>
             <button className="btn btn-dark" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>Available Soon</button>
           </div>
-          <div className="fade-in fade-in-2">
-            <Suspense fallback={<div style={{ height: 280 }} />}>
-              <ShieldOrb />
-            </Suspense>
+          <div className="fade-in fade-in-2" style={{
+            background: 'linear-gradient(145deg, #fef0f3, #fce4ea)',
+            borderRadius: 24, padding: '40px 32px',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20,
+            border: '1px solid #FF718F18', minHeight: 280,
+          }}>
+            <div style={{ background: 'white', borderRadius: 20, padding: '24px 32px', textAlign: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.04)', border: '1px solid #FF718F20', maxWidth: 240 }}>
+              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#FF718F', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 12 }}>You Save</div>
+              <div style={{ fontSize: '2.4rem', fontWeight: 900, color: 'var(--text)', lineHeight: 1 }}>99.7%</div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-2)', marginTop: 8 }}>vs protocol liquidation</div>
+            </div>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#FF718F', textDecoration: 'line-through' }}>$1,500</div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-3)' }}>10% penalty on $15K</div>
+              </div>
+              <span style={{ color: 'var(--text-3)' }}>→</span>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#29C1A2' }}>$4.50</div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-3)' }}>0.03% VAEA fee</div>
+              </div>
+            </div>
           </div>
         </div>
 
