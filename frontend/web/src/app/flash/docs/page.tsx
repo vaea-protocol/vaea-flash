@@ -5,6 +5,7 @@ import {
   SECTIONS, OVERVIEW_CONTENT, QUICKSTART, TOKENS_DIRECT, TOKENS_SYNTHETIC,
   API_ENDPOINTS, ERRORS, FAQ,
   TURBO_MODE, SIMULATE, MULTI_FLASH, PROFITABILITY, SMART_RETRY,
+  JITO_BUNDLES,
 } from './content';
 
 /* ═══════════════════════════════════════════════
@@ -562,6 +563,54 @@ export default function DocsPage() {
               </tbody>
             </table>
             <Callout type="warn">Program errors (your logic bugs) are <strong>never retried</strong>. This prevents wasting SOL on transactions that will always fail.</Callout>
+          </>)}
+
+          {/* ─── JITO BUNDLES ─── */}
+          {section === 'jito' && (<>
+            <H1>🔗 {JITO_BUNDLES.title}</H1>
+            <P>{JITO_BUNDLES.tagline}</P>
+            <P>{JITO_BUNDLES.description}</P>
+            <Code code={JITO_BUNDLES.code} lang="typescript" />
+
+            <H2>Tip Strategies</H2>
+            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 24, fontSize: '0.88rem' }}>
+              <thead><tr style={{ borderBottom: '2px solid var(--border)' }}>
+                <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 800, fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-3)' }}>Strategy</th>
+                <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 800, fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-3)' }}>Tip Amount</th>
+                <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 800, fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-3)' }}>Use Case</th>
+              </tr></thead>
+              <tbody>
+                {JITO_BUNDLES.tipStrategies.map(s => (
+                  <tr key={s.strategy} style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '10px 12px', fontFamily: "'SF Mono', monospace", fontWeight: 700 }}>{s.strategy}</td>
+                    <td style={{ padding: '10px 12px' }}>{s.amount}</td>
+                    <td style={{ padding: '10px 12px', color: 'var(--text-2)' }}>{s.use}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <H3>What this gives you</H3>
+            <div style={{ marginBottom: 20 }}>
+              {JITO_BUNDLES.gives.map(g => (
+                <div key={g} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6, fontSize: '0.88rem' }}>
+                  <span style={{ color: '#29C1A2', fontWeight: 700 }}>✓</span>
+                  <span>{g}</span>
+                </div>
+              ))}
+            </div>
+
+            <H3>What this does NOT guarantee</H3>
+            <div style={{ marginBottom: 20 }}>
+              {JITO_BUNDLES.doesNot.map(d => (
+                <div key={d} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6, fontSize: '0.88rem' }}>
+                  <span style={{ color: '#FF718F', fontWeight: 700 }}>✗</span>
+                  <span>{d}</span>
+                </div>
+              ))}
+            </div>
+
+            <Callout type="warn">Jito Block Engine is <strong>mainnet only</strong>. There is no Jito devnet. Bundle tests require mainnet SOL.</Callout>
           </>)}
 
           {/* ─── API REFERENCE ─── */}

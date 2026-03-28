@@ -11,6 +11,7 @@ export const SECTIONS = [
   { id: 'multiflash', label: 'Multi-Token Flash', group: 'Features' },
   { id: 'profitability', label: 'Profitability Check', group: 'Features' },
   { id: 'retry', label: 'Smart Retry', group: 'Features' },
+  { id: 'jito', label: 'Jito Bundles', group: 'Features' },
   { id: 'api', label: 'REST API', group: 'Reference' },
   { id: 'sdk', label: 'SDK Reference', group: 'Reference' },
   { id: 'usecases', label: 'Use Cases', group: 'Guides' },
@@ -407,3 +408,39 @@ export const FAQ = [
   { q: 'Do you store any user data?', a: 'No. VAEA Flash has zero database and zero data retention. We read on-chain state only. No tracking, no cookies, no accounts.' },
   { q: 'What if the VAEA API is down?', a: 'Use executeLocal() or localBuild() — these build instructions 100% locally and don\'t depend on the API. Only the RPC connection to Solana is required.' },
 ];
+
+export const JITO_BUNDLES = {
+  title: 'Jito Bundle Integration',
+  tagline: 'Send flash loans via Jito Block Engine for bundle privacy and atomic execution.',
+  description: 'Add 2 lines to any executeLocal() call to send your flash loan as a Jito bundle. Your transaction is never exposed in the public mempool — it goes directly to Jito validators. Tip is auto-calculated based on the current Jito tip floor.',
+  code: `const sig = await flash.executeLocal({
+  token: 'SOL',
+  amount: 1000,
+  onFunds: async (ixs) => {
+    ixs.push(myArbitrageInstruction);
+    return ixs;
+  },
+}, {
+  sendVia: 'jito',
+  jito: {
+    tip: 'competitive',   // 'min' | 'competitive' | 'aggressive' | number
+    region: 'amsterdam',  // nearest Block Engine
+  },
+});`,
+  tipStrategies: [
+    { strategy: "'min'", amount: '~1–5K lamports', use: 'Low-value opportunities, testing' },
+    { strategy: "'competitive'", amount: '~10–50K lamports', use: 'Recommended for most bots' },
+    { strategy: "'aggressive'", amount: '100K+ lamports', use: 'High-value liquidations, critical arbs' },
+    { strategy: 'number', amount: 'Exact lamports', use: 'Full manual control' },
+  ],
+  gives: [
+    'Bundle privacy — TX not in public mempool',
+    'Auto-calculated tip based on Jito tip floor',
+    'Smart retry with tip escalation on failure',
+    'Zero new npm dependencies — pure fetch()',
+  ],
+  doesNot: [
+    'Guarantee landing in X blocks — tip is competitive',
+    'Provide full MEV protection — bundles are private, not invulnerable',
+  ],
+};

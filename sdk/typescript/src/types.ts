@@ -268,5 +268,9 @@ export interface ExecuteOptions {
   retry?: import('./retry').RetryConfig;
   /** Priority fee in micro-lamports per CU (default: auto) */
   priorityMicroLamports?: number;
+  /** Send transport: 'rpc' (default) or 'jito' (Jito Block Engine bundle) */
+  sendVia?: 'rpc' | 'jito';
+  /** Jito bundle configuration (only used when sendVia is 'jito') */
+  jito?: import('./jito').JitoConfig;
 }
 

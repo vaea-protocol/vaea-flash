@@ -18,6 +18,7 @@ import {
   ComputeBudgetProgram,
   Keypair,
 } from '@solana/web3.js';
+import type { JitoConfig } from './jito';
 
 export type RetryReason = 'expired' | 'congestion' | 'program_error';
 
@@ -50,6 +51,8 @@ export async function sendWithRetry(
   lookupTables: AddressLookupTableAccount[],
   config: RetryConfig = DEFAULT_RETRY_CONFIG,
   initialPriorityMicroLamports?: number,
+  sendVia?: 'rpc' | 'jito',
+  jitoConfig?: JitoConfig,
 ): Promise<string> {
   if (config.strategy === 'none') {
     return sendOnce(connection, wallet, instructions, lookupTables, initialPriorityMicroLamports ?? 0);
@@ -60,9 +63,14 @@ export async function sendWithRetry(
 
   for (let attempt = 1; attempt <= config.maxAttempts; attempt++) {
     try {
-      const sig = await sendOnce(
-        connection, wallet, instructions, lookupTables, priorityMicroLamports,
-      );
+      const sig = sendVia === 'jito'
+        ? await sendOnceViaJito(
+            connection, wallet, instructions, lookupTables,
+            priorityMicroLamports, jitoConfig ?? {},
+          )
+        : await sendOnce(
+            connection, wallet, instructions, lookupTables, priorityMicroLamports,
+          );
       return sig;
     } catch (err: any) {
       lastError = err;
@@ -135,4 +143,52 @@ function classifyError(err: any): RetryReason {
 
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Jito Bundle Send Path
+// ═══════════════════════════════════════════════════════════
+
+async function sendOnceViaJito(
+  connection: Connection,
+  wallet: Keypair,
+  instructions: TransactionInstruction[],
+  lookupTables: AddressLookupTableAccount[],
+  priorityMicroLamports: number,
+  jitoConfig: JitoConfig,
+): Promise<string> {
+  // Lazy import to avoid loading Jito code when not needed
+  const {
+    resolveBlockEngineUrl, calculateTip, buildTipInstruction,
+    sendJitoBundle, pollBundleStatus,
+  } = await import('./jito');
+
+  const blockEngineUrl = resolveBlockEngineUrl(jitoConfig.region);
+  const tipLamports = calculateTip(jitoConfig.tip ?? 'competitive');
+
+  // Build instructions: priority fee + user IXs + tip (tip MUST be last)
+  const allIxs = [
+    ...(priorityMicroLamports > 0
+      ? [ComputeBudgetProgram.setComputeUnitPrice({ microLamports: priorityMicroLamports })]
+      : []),
+    ...instructions,
+    buildTipInstruction(wallet.publicKey, tipLamports),
+  ];
+
+  const { blockhash } = await connection.getLatestBlockhash('confirmed');
+
+  const messageV0 = new TransactionMessage({
+    payerKey: wallet.publicKey,
+    recentBlockhash: blockhash,
+    instructions: allIxs,
+  }).compileToV0Message(lookupTables);
+
+  const tx = new VersionedTransaction(messageV0);
+  tx.sign([wallet]);
+
+  // Send as bundle (single TX bundle)
+  const bundleId = await sendJitoBundle(blockEngineUrl, [tx]);
+
+  // Poll for landing (30s timeout)
+  return pollBundleStatus(blockEngineUrl, bundleId, 30_000);
 }

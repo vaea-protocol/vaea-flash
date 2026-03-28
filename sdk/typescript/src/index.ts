@@ -42,3 +42,9 @@ export type { SlippageMode } from './slippage';
 // Turbo: local instruction builder (zero HTTP)
 export { localBuild, TOKEN_REGISTRY, FEE_BPS_SDK, FEE_BPS_UI } from './local-builder';
 export type { LocalBuildParams, LocalBuildResult } from './local-builder';
+// Jito: send flash loans via Jito Block Engine bundles
+export {
+  sendJitoBundle, buildTipInstruction, calculateTip, fetchTipAccounts,
+  resolveBlockEngineUrl, JITO_BLOCK_ENGINE_URLS, JITO_TIP_ACCOUNTS,
+} from './jito';
+export type { JitoConfig, TipStrategy, JitoBundleResult } from './jito';

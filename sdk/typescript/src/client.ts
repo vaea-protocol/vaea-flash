@@ -435,6 +435,8 @@ export class VaeaFlash {
       lookupTables,
       retryConfig,
       options?.priorityMicroLamports,
+      options?.sendVia,
+      options?.jito,
     );
   }
 

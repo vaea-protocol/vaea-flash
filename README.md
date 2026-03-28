@@ -395,6 +395,47 @@ The retry logic classifies errors:
 - **Blockhash expired** → rebuild TX with fresh blockhash
 - **Congestion** → escalate priority fee
 - **Program error** → never retried (your logic has a bug)
+---
+
+### 🔗 Jito Bundle Integration
+
+Send flash loans via [Jito Block Engine](https://jito.wtf) for **bundle privacy** (not in public mempool) and atomic execution. Add 2 lines to any `executeLocal()` call:
+
+```typescript
+const sig = await flash.executeLocal({
+  token: 'SOL',
+  amount: 1000,
+  onFunds: async (ixs) => {
+    ixs.push(myArbitrageInstruction);
+    return ixs;
+  },
+}, {
+  sendVia: 'jito',
+  jito: {
+    tip: 'competitive',   // auto-calculated tip
+    region: 'amsterdam',  // nearest Block Engine
+  },
+});
+```
+
+**Tip Strategies:**
+
+| Strategy | Tip Amount | Use Case |
+|:--|:--|:--|
+| `'min'` | ~1–5K lamports | Low-value opportunities, testing |
+| `'competitive'` | ~10–50K lamports | Recommended for most bots |
+| `'aggressive'` | 100K+ lamports | High-value liquidations, critical arbs |
+| `number` | Exact lamports | Full manual control |
+
+**What this gives you:**
+- ✅ Bundle privacy — your TX is not in the public mempool
+- ✅ Auto-calculated tip based on Jito tip floor
+- ✅ Smart retry works with Jito (escalates tip on failure)
+- ✅ Zero new npm dependencies — pure `fetch()` to Block Engine
+
+**What this does NOT guarantee:**
+- ❌ Landing in X blocks — tip is competitive, not a guarantee
+- ❌ Full MEV protection — bundles are private, but not invulnerable
 
 ---
 
