@@ -153,17 +153,18 @@ function GlassKnot3() {
 
 /* ═══ Scene wrappers — each with different background shapes ═══ */
 
-function SceneShell({ children, bgShapes }: { children: React.ReactNode; bgShapes: React.ReactNode }) {
+function SceneShell({ children, bgShapes, bgColor = '#FEF4EF' }: { children: React.ReactNode; bgShapes: React.ReactNode; bgColor?: string }) {
   const bp = useBreakpoint();
-  const height = bp === 'mobile' ? 200 : bp === 'tablet' ? 240 : 280;
+  const minH = bp === 'mobile' ? 200 : bp === 'tablet' ? 240 : 280;
 
   return (
-    <div style={{ width: '100%', height, pointerEvents: 'none' }}>
+    <div style={{ width: '100%', height: '100%', minHeight: minH, pointerEvents: 'none', lineHeight: 0, margin: 0, background: bgColor }}>
       <Canvas
         camera={{ position: [0, 0, 7], fov: 50 }}
         gl={{ alpha: true, antialias: true }}
         style={{ background: 'transparent' }}
       >
+        <color attach="background" args={[bgColor]} />
         <ResponsiveCamera desktop={7} mobile={9} />
         <ambientLight intensity={0.6} />
         <directionalLight intensity={0.8} position={[5, 5, 8]} />
@@ -183,11 +184,11 @@ function SceneShell({ children, bgShapes }: { children: React.ReactNode; bgShape
 
 export function SwapOrb() {
   return (
-    <SceneShell bgShapes={<>
-      <BgSphere position={[-3.0, 1.3, -1.5]} color="#FF718F" s={0.45} />
+    <SceneShell bgColor="#f0faf7" bgShapes={<>
+      <BgSphere position={[-3.0, 1.3, -1.5]} color="#29C1A2" s={0.45} />
       <BgSphere position={[2.8, 1.0, -1]} color="#29C1A2" s={0.35} />
-      <BgSphere position={[1.2, -2.2, -1.5]} color="#FF9060" s={0.5} />
-      <BgSphere position={[-2.5, -1.8, -0.8]} color="#823FFF" s={0.38} />
+      <BgSphere position={[1.2, -2.2, -1.5]} color="#29C1A2" s={0.5} />
+      <BgSphere position={[-2.5, -1.8, -0.8]} color="#29C1A2" s={0.38} />
     </>}>
       <GlassKnot1 />
     </SceneShell>
@@ -196,11 +197,11 @@ export function SwapOrb() {
 
 export function ShieldOrb() {
   return (
-    <SceneShell bgShapes={<>
+    <SceneShell bgColor="#fef0f3" bgShapes={<>
       <BgRoundedCube position={[-2.8, 1.4, -1.5]} color="#FF718F" s={0.5} rotation={[0.3, 0.4, 0.2]} />
-      <BgRoundedCube position={[2.6, 0.8, -1]} color="#29C1A2" s={0.4} rotation={[0.5, 0.2, -0.3]} />
-      <BgRoundedCube position={[1.0, -2.0, -1.5]} color="#FF9060" s={0.55} rotation={[0.1, 0.6, -0.4]} />
-      <BgRoundedCube position={[-2.3, -1.6, -0.8]} color="#823FFF" s={0.42} rotation={[0.4, 0.1, 0.5]} />
+      <BgRoundedCube position={[2.6, 0.8, -1]} color="#FF718F" s={0.4} rotation={[0.5, 0.2, -0.3]} />
+      <BgRoundedCube position={[1.0, -2.0, -1.5]} color="#FF718F" s={0.55} rotation={[0.1, 0.6, -0.4]} />
+      <BgRoundedCube position={[-2.3, -1.6, -0.8]} color="#FF718F" s={0.42} rotation={[0.4, 0.1, 0.5]} />
     </>}>
       <GlassKnot2 />
     </SceneShell>
@@ -209,10 +210,10 @@ export function ShieldOrb() {
 
 export function LeverageOrb() {
   return (
-    <SceneShell bgShapes={<>
-      <BgTriangle position={[-2.9, 1.2, -1.5]} color="#FF718F" s={0.55} rotation={[0.2, 0.3, 0.1]} />
-      <BgTriangle position={[2.7, 1.1, -1]} color="#29C1A2" s={0.45} rotation={[0.4, 0.5, -0.2]} />
-      <BgTriangle position={[1.3, -2.1, -1.5]} color="#FF9060" s={0.6} rotation={[0.1, 0.2, -0.5]} />
+    <SceneShell bgColor="#f5f0ff" bgShapes={<>
+      <BgTriangle position={[-2.9, 1.2, -1.5]} color="#823FFF" s={0.55} rotation={[0.2, 0.3, 0.1]} />
+      <BgTriangle position={[2.7, 1.1, -1]} color="#823FFF" s={0.45} rotation={[0.4, 0.5, -0.2]} />
+      <BgTriangle position={[1.3, -2.1, -1.5]} color="#823FFF" s={0.6} rotation={[0.1, 0.2, -0.5]} />
       <BgTriangle position={[-2.4, -1.9, -0.8]} color="#823FFF" s={0.48} rotation={[0.3, 0.1, 0.6]} />
     </>}>
       <GlassKnot3 />

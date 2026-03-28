@@ -70,10 +70,11 @@ export default function ToolsHubPage() {
                 overflow: 'hidden',
                 transition: 'box-shadow 0.35s var(--ease), transform 0.35s var(--ease)',
                 cursor: 'pointer',
+                alignItems: 'stretch',
               }}
             >
               {/* 3D side */}
-              <div style={{ order: i % 2 === 0 ? 1 : 2 }}>
+              <div style={{ order: i % 2 === 0 ? 1 : 2, minHeight: 280 }}>
                 <Suspense fallback={<div style={{ height: 280 }} />}>
                   <t.Orb />
                 </Suspense>

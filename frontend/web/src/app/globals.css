@@ -358,6 +358,10 @@ h1, h2, h3, h4 {
   .grid-4 { grid-template-columns: 1fr 1fr !important; }
   .grid-sidebar { grid-template-columns: 1fr !important; }
 
+  /* Tool cards: text on top, 3D on bottom */
+  .tool-section-card > div:first-child { order: 2 !important; }
+  .tool-section-card > div:last-child { order: 1 !important; }
+
   /* ═══ HERO MOBILE ═══ */
   .grid-hero { text-align: center; min-height: auto !important; padding: 24px 0 0 !important; gap: 8px !important; overflow: hidden; }
   .grid-hero .tag { margin-left: auto; margin-right: auto; }
