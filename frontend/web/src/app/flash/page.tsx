@@ -21,6 +21,8 @@ const SYNTH_FEES: Record<string, number> = {
   TRUMP: 0.10, PENGU: 0.12,
   // Mid-caps via Jupiter (~0.08-0.15% swap) → total ~0.11-0.18%
   BONK: 0.11, WIF: 0.11, RAY: 0.10, HNT: 0.14, RNDR: 0.13, JITO: 0.09, KMNO: 0.12,
+  // Infrastructure via Jupiter (~0.05-0.15% swap) → total ~0.08-0.18%
+  wETH: 0.10, PYTH: 0.14, W: 0.15, ORCA: 0.11,
 };
 
 const FALLBACK_TOKENS: TokenCapacity[] = SUPPORTED_TOKENS.map(t => {
@@ -52,6 +54,8 @@ const COINGECKO_MAP: Record<string, string> = {
   PYUSD: 'paypal-usd', USDS: 'usds',
   USD1: 'usd1', USDG: 'usdg',
   EURC: 'euro-coin',
+  wETH: 'weth', PYTH: 'pyth-network',
+  W: 'wormhole', ORCA: 'orca',
 };
 
 export default function FlashDashboard() {

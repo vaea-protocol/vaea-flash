@@ -204,6 +204,8 @@ export const SUPPORTED_TOKENS = [
   'BONK', 'WIF', 'RAY', 'HNT', 'RNDR', 'JITO', 'KMNO',
   // Synthetic routes — Stablecoins
   'PYUSD', 'USDS', 'USD1', 'USDG', 'EURC',
+  // Synthetic routes — Infrastructure / Cross-chain
+  'wETH', 'PYTH', 'W', 'ORCA',
 ] as const;
 
 

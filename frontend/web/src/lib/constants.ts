@@ -25,6 +25,10 @@ export const SUPPORTED_TOKENS = [
   { symbol: 'USD1', name: 'World Liberty USD', decimals: 6, route: 'synthetic', icon: '🏛️' },
   { symbol: 'USDG', name: 'Global Dollar', decimals: 6, route: 'synthetic', icon: '🌍' },
   { symbol: 'EURC', name: 'Euro Coin', decimals: 6, route: 'synthetic', icon: '€' },
+  { symbol: 'wETH', name: 'Wormhole ETH', decimals: 8, route: 'synthetic', icon: 'Ξ' },
+  { symbol: 'PYTH', name: 'Pyth Network', decimals: 6, route: 'synthetic', icon: '🔮' },
+  { symbol: 'W', name: 'Wormhole', decimals: 6, route: 'synthetic', icon: '🌀' },
+  { symbol: 'ORCA', name: 'Orca', decimals: 6, route: 'synthetic', icon: '🐋' },
 ] as const;
 
 export const formatAmount = (amount: number, decimals = 2): string => {

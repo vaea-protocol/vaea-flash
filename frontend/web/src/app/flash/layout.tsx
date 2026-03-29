@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Flash Loan Dashboard — VAEA Flash',
-    description: '26+ tokens available for flash loans on Solana. Real-time liquidity and fees.',
+    description: '30+ tokens available for flash loans on Solana. Real-time liquidity and fees.',
     type: 'website',
     url: 'https://vaea.fi/flash',
   },

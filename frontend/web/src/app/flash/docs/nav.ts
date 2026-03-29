@@ -28,8 +28,8 @@ export const NAV: NavGroup[] = [
     pages: [
       { slug: 'architecture', title: 'Architecture', description: 'Sandwich pattern, PDAs, multi-protocol routing, security model', icon: '🏗️',
         headings: [{ id: 'sandwich', label: 'Sandwich Pattern', level: 2 }, { id: 'pdas', label: 'Program Accounts', level: 2 }, { id: 'routing', label: 'Multi-Protocol Routing', level: 2 }, { id: 'alt', label: 'Address Lookup Tables', level: 2 }, { id: 'security', label: 'Security Model', level: 2 }] },
-      { slug: 'supported-tokens', title: 'Supported Tokens', description: '26 tokens — direct route (8) and synthetic route (18)', icon: '🪙',
-        headings: [{ id: 'direct', label: 'Direct Route (8)', level: 2 }, { id: 'synthetic', label: 'Synthetic Route (18)', level: 2 }, { id: 'lst', label: 'LSTs via Sanctum', level: 3 }, { id: 'majors', label: 'Majors via Jupiter', level: 3 }, { id: 'midcaps', label: 'Mid-caps', level: 3 }, { id: 'stables', label: 'Stablecoins', level: 3 }] },
+      { slug: 'supported-tokens', title: 'Supported Tokens', description: '30 tokens — direct route (8) and synthetic route (22)', icon: '🪙',
+        headings: [{ id: 'direct', label: 'Direct Route (8)', level: 2 }, { id: 'synthetic', label: 'Synthetic Route (22)', level: 2 }, { id: 'lst', label: 'LSTs via Sanctum', level: 3 }, { id: 'majors', label: 'Majors via Jupiter', level: 3 }, { id: 'midcaps', label: 'Mid-caps', level: 3 }, { id: 'stables', label: 'Stablecoins', level: 3 }] },
       { slug: 'routing', title: 'Routing & Routes', description: 'Direct vs synthetic routing, protocol priority, swap providers, fallback', icon: '🔀',
         headings: [{ id: 'how', label: 'How Routing Works', level: 2 }, { id: 'priority', label: 'Protocol Priority', level: 2 }, { id: 'swap', label: 'Swap Providers', level: 2 }, { id: 'fallback', label: 'Fallback Behavior', level: 2 }] },
       { slug: 'fees', title: 'Fees & Pricing', description: '0.03% SDK fee — transparent model, fee calculator, comparison', icon: '💰',

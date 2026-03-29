@@ -26,7 +26,7 @@ export const OVERVIEW_CONTENT = {
   tagline: 'The universal flash loan layer for Solana',
   intro: `VAEA Flash lets you borrow any SPL token — SOL, stablecoins, LSTs, mid-caps — in a single atomic transaction, with no collateral required. One SDK call, any token, from 0.03% fee, ~100ms latency.`,
   whyExists: [
-    { problem: 'Existing flash loans only cover SOL, USDC, USDT', solution: 'VAEA covers 26 tokens including LSTs, majors, stablecoins, and mid-caps' },
+    { problem: 'Existing flash loans only cover SOL, USDC, USDT', solution: 'VAEA covers 30 tokens including LSTs, majors, stablecoins, and mid-caps' },
     { problem: 'Each protocol has its own incompatible SDK', solution: 'One SDK, one line of code, any token' },
     { problem: 'No flash loans for mSOL, JitoSOL, BONK, TRUMP...', solution: 'Synthetic routing via Sanctum & Jupiter' },
     { problem: 'TX construction requires RPC lookups (~300ms)', solution: 'Turbo Mode: local build in ~91µs, zero HTTP calls' },
@@ -718,7 +718,7 @@ bps = calculate_slippage_bps("auto", "synthetic", 0.05)`,
 export const API_ENDPOINTS = [
   {
     method: 'GET', path: '/v1/capacity',
-    desc: 'Returns real-time borrowing capacity for all 26 tokens. Refreshes every 2s.',
+    desc: 'Returns real-time borrowing capacity for all 30 tokens. Refreshes every 2s.',
     params: [],
     response: `{
   "tokens": [{
@@ -795,7 +795,7 @@ export const ERRORS = [
 export const FAQ = [
   { q: 'Do I need collateral?', a: 'No. Flash loans are uncollateralized. You borrow and repay within the same atomic transaction.' },
   { q: 'What if my TX fails mid-execution?', a: 'Nothing happens. Solana transactions are atomic — everything reverts. You only pay the base TX fee.' },
-  { q: 'How is VAEA different from Jupiter Flash Loan?', a: 'Jupiter only supports tokens on Jupiter Lend. VAEA covers 26 tokens via synthetic routing — LSTs, majors, stablecoins, and mid-caps.' },
+  { q: 'How is VAEA different from Jupiter Flash Loan?', a: 'Jupiter only supports tokens on Jupiter Lend. VAEA covers 30 tokens via synthetic routing — LSTs, majors, stablecoins, and mid-caps.' },
   { q: 'What are direct vs synthetic routes?', a: 'Direct = borrow natively (0.03% fee). Synthetic = borrow SOL, swap to target via Sanctum/Jupiter, swap back on repay (higher fee).' },
   { q: 'Can I flash multiple tokens at once?', a: 'Yes. borrowMulti() borrows multiple tokens atomically with a nested sandwich pattern.' },
   { q: 'What is Turbo Mode?', a: 'Turbo Mode builds instructions locally — no API calls. Reduces latency from ~180ms to ~100ms.' },

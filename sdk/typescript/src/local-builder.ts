@@ -61,6 +61,10 @@ export const TOKEN_REGISTRY: Record<string, { mint: PublicKey; decimals: number 
   USD1:     { mint: new PublicKey('USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB'), decimals: 6 },
   USDG:     { mint: new PublicKey('2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH'), decimals: 6 },
   EURC:     { mint: new PublicKey('HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr'), decimals: 6 },
+  wETH:     { mint: new PublicKey('7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs'), decimals: 8 },
+  PYTH:     { mint: new PublicKey('HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3'), decimals: 6 },
+  W:        { mint: new PublicKey('85VBFQZC9TZkfaptBWjvUw7YbZjy52A6mjtPGjstQAmQ'), decimals: 6 },
+  ORCA:     { mint: new PublicKey('orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE'), decimals: 6 },
 };
 
 // ═══════════════════════════════════════════════════════════

@@ -25,7 +25,7 @@ export default function Introduction() {
     <DocTable
       headers={['Problem', 'VAEA Solution']}
       rows={[
-        ['Existing flash loans only cover SOL, USDC, USDT', <><Tag>26 tokens</Tag> — LSTs, majors, mid-caps, stablecoins</>],
+        ['Existing flash loans only cover SOL, USDC, USDT', <><Tag>30 tokens</Tag> — LSTs, majors, mid-caps, stablecoins</>],
         ['Each protocol has its own incompatible SDK', <><Tag>One SDK</Tag>, one call, any token</>],
         ['No flash loans for mSOL, JitoSOL, BONK, TRUMP…', <><Tag color="purple">Synthetic routing</Tag> via Sanctum & Jupiter</>],
         ['If a source is full, there\'s no fallback', <><Tag color="coral">Automatic</Tag> multi-protocol fallback</>],

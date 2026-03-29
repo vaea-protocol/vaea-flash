@@ -8,7 +8,7 @@ export default function SdkUtilities() {
     <p style={{ color: 'var(--text-2)', lineHeight: 1.8, marginBottom: 24, fontSize: '0.92rem' }}>Helper methods available on the <code>VaeaFlash</code> client for monitoring and debugging.</p>
 
     <h2 id="token-capacity" style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: 10, marginTop: 40, paddingBottom: 10, borderBottom: '1px solid var(--border)' }}>getTokenCapacity()</h2>
-    <p style={{ color: 'var(--text-2)', lineHeight: 1.8, marginBottom: 16, fontSize: '0.88rem' }}>Get capacity for a <strong>single token</strong> without loading all 26 tokens. Throws <code>TOKEN_NOT_SUPPORTED</code> if not found.</p>
+    <p style={{ color: 'var(--text-2)', lineHeight: 1.8, marginBottom: 16, fontSize: '0.88rem' }}>Get capacity for a <strong>single token</strong> without loading all 30 tokens. Throws <code>TOKEN_NOT_SUPPORTED</code> if not found.</p>
     <CodeTabs
       ts={`const msol = await flash.getTokenCapacity('mSOL');
 console.log(msol.max_amount);      // 12000

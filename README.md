@@ -51,7 +51,7 @@ const sig = await flash.executeLocal({
 
 | Problem | VAEA Solution |
 |---|---|
-| Existing flash loans only cover SOL, USDC, USDT | **26 tokens** including LSTs, majors, and mid-caps |
+| Existing flash loans only cover SOL, USDC, USDT | **30 tokens** including LSTs, majors, and mid-caps |
 | Each protocol has its own incompatible SDK | **One SDK**, one line of code, any token |
 | No flash loans for mSOL, JitoSOL, BONK, TRUMP... | **Synthetic routing** via Sanctum & Jupiter |
 | If a source is full, there's no fallback | **Automatic multi-protocol fallback** |
@@ -520,7 +520,7 @@ VAEA Flash **owns no liquidity**. It routes borrows to existing lending protocol
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/v1/capacity` | Real-time borrowing capacity for all 26 tokens |
+| `GET` | `/v1/capacity` | Real-time borrowing capacity for all 30 tokens |
 | `GET` | `/v1/quote?token=SOL&amount=1000` | Fee quote with breakdown |
 | `POST` | `/v1/build` | Build flash loan instructions (prefix + suffix) |
 | `GET` | `/v1/health` | System health and protocol status |
@@ -647,7 +647,7 @@ main();
 
 | Phase | Status | Description |
 |---|---|---|
-| **V1 Beta** | ✅ Live (Devnet) | Flash loans via protocol aggregation — 26 tokens, 3 SDKs, REST API, dashboard |
+| **V1 Beta** | ✅ Live (Devnet) | Flash loans via protocol aggregation — 30 tokens, 3 SDKs, REST API, dashboard |
 | **Mainnet Launch** | 🔜 April 2026 | Production deployment, audit, public launch |
 | **Zero-CPI Integration** | 🔬 In Development | Protocol-level flash loan verification without CPI overhead |
 | **vSOL V2** | 📋 Planned | Unlimited flash loans via synthetic mint/burn — zero congestion |

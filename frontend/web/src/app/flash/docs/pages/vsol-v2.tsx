@@ -10,7 +10,7 @@ export default function VsolV2() {
     <h1 style={{ fontSize: '2.2rem', fontWeight: 900, marginBottom: 10, letterSpacing: '-0.03em' }}>vSOL — Unlimited Flash Loans</h1>
     <p style={{ color: 'var(--text-2)', lineHeight: 1.8, marginBottom: 24, fontSize: '0.92rem' }}>A fundamentally new approach to flash loans that eliminates congestion, removes dependence on third-party protocols, and enables <strong>unlimited borrowing capacity</strong> through a synthetic mint/burn mechanism.</p>
 
-    <Callout type="warn">vSOL V2 is <strong>in development</strong> and will launch after the V1 beta is validated. This page describes the architecture and vision. The V1 flash loan system (26 tokens via protocol aggregation) is live and fully functional today.</Callout>
+    <Callout type="warn">vSOL V2 is <strong>in development</strong> and will launch after the V1 beta is validated. This page describes the architecture and vision. The V1 flash loan system (30 tokens via protocol aggregation) is live and fully functional today.</Callout>
 
     <h2 id="vision" style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: 10, marginTop: 40, paddingBottom: 10, borderBottom: '1px solid var(--border)' }}>Vision</h2>
     <p style={{ color: 'var(--text-2)', lineHeight: 1.8, marginBottom: 16, fontSize: '0.88rem' }}>VAEA Flash V1 aggregates liquidity from lending protocols (Marginfi, Kamino) to offer flash loans. <strong>V2 creates its own liquidity</strong> via vSOL — a liquid staking token (LST) that enables unlimited flash loans without any pool to drain.</p>
@@ -95,7 +95,7 @@ With pool-based flash loans (current):
     <h2 id="roadmap" style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: 10, marginTop: 40, paddingBottom: 10, borderBottom: '1px solid var(--border)' }}>Roadmap</h2>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
       {[
-        { phase: 'Phase 1', title: 'V1 Beta (Now)', desc: 'Flash loans via protocol aggregation — 26 tokens, 3 SDKs, live on devnet', done: true },
+        { phase: 'Phase 1', title: 'V1 Beta (Now)', desc: 'Flash loans via protocol aggregation — 30 tokens, 3 SDKs, live on devnet', done: true },
         { phase: 'Phase 2', title: 'vSOL LST Creation', desc: 'Create vSOL via Sanctum, pool on Orca/Meteora, Jupiter listing', done: false },
         { phase: 'Phase 3', title: 'Unlimited Flash Loans', desc: 'mint_for_flash / burn_flash program, SDK integration, migration V1 → V2', done: false },
       ].map(r => (
