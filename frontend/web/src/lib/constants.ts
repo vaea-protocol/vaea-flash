@@ -12,7 +12,6 @@ export const SUPPORTED_TOKENS = [
   { symbol: 'INF', name: 'Infinity by Sanctum', decimals: 9, route: 'synthetic', icon: '∞' },
   { symbol: 'laineSOL', name: 'Laine Staked SOL', decimals: 9, route: 'synthetic', icon: 'ℓ' },
   { symbol: 'TRUMP', name: 'Official Trump', decimals: 6, route: 'synthetic', icon: '🇺🇸' },
-  { symbol: 'VIRTUAL', name: 'Virtual Protocol', decimals: 9, route: 'synthetic', icon: '🤖' },
   { symbol: 'PENGU', name: 'Pudgy Penguins', decimals: 6, route: 'synthetic', icon: '🐧' },
   { symbol: 'BONK', name: 'Bonk', decimals: 5, route: 'synthetic', icon: '🐕' },
   { symbol: 'WIF', name: 'dogwifhat', decimals: 6, route: 'synthetic', icon: '🎩' },

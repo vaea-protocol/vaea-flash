@@ -56,7 +56,6 @@ export const TOKEN_REGISTRY: Record<string, { mint: PublicKey; decimals: number 
   KMNO:     { mint: new PublicKey('KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS'), decimals: 6 },
   TRUMP:    { mint: new PublicKey('6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN'), decimals: 6 },
   PENGU:    { mint: new PublicKey('2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv'), decimals: 6 },
-  VIRTUAL:  { mint: new PublicKey('HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC'), decimals: 9 },
   PYUSD:    { mint: new PublicKey('2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo'), decimals: 6 },
   USDS:     { mint: new PublicKey('USDSwr9ApdHk5bvJKMjzff41FfuX8bSxdKcR81vTwcA'), decimals: 6 },
   USD1:     { mint: new PublicKey('USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB'), decimals: 6 },

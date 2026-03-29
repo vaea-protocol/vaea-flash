@@ -199,7 +199,7 @@ export const SUPPORTED_TOKENS = [
   // Synthetic routes — LSTs
   'mSOL', 'bSOL', 'INF', 'laineSOL',
   // Synthetic routes — Majors
-  'TRUMP', 'PENGU', 'VIRTUAL',
+  'TRUMP', 'PENGU',
   // Synthetic routes — Mid-caps
   'BONK', 'WIF', 'RAY', 'HNT', 'RNDR', 'JITO', 'KMNO',
   // Synthetic routes — Stablecoins

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     template: "%s | VAEA Flash",
   },
   description:
-    "Flash loan any SPL token on Solana in a single atomic transaction. 21+ tokens supported including LSTs and mid-caps. From 0.03% fee. SDKs in TypeScript, Rust, and Python.",
+    "Flash loan any SPL token on Solana in a single atomic transaction. 26+ tokens supported including LSTs and mid-caps. From 0.03% fee. SDKs in TypeScript, Rust, and Python.",
   keywords: [
     "solana flash loan",
     "flash loan",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "VAEA Flash — Universal Flash Loans on Solana",
     description:
-      "Flash loan any SPL token on Solana. 21+ tokens, from 0.03% fee, one atomic transaction. The universal flash loan layer for Solana DeFi.",
+      "Flash loan any SPL token on Solana. 26+ tokens, from 0.03% fee, one atomic transaction. The universal flash loan layer for Solana DeFi.",
     siteName: "VAEA Flash",
     type: "website",
     url: "https://vaea.fi/flash",

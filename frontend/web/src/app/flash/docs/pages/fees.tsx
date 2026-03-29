@@ -34,7 +34,7 @@ export default function Fees() {
 
     <h2 id="comparison" style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: 10, marginTop: 40, paddingBottom: 10, borderBottom: '1px solid var(--border)' }}>Fee Comparison</h2>
     <DocTable headers={['Protocol', 'Fee', 'Tokens', 'Notes']} rows={[
-      [<strong>VAEA Flash</strong>, <Tag>0.03%</Tag>, '27 tokens', 'SDK rate — widest coverage'],
+      [<strong>VAEA Flash</strong>, <Tag>0.03%</Tag>, '26 tokens', 'SDK rate — widest coverage'],
       ['Marginfi', <Tag color="sky">0%</Tag>, '6 tokens', 'Free but limited tokens, no fallback'],
       ['Solend', <Tag color="coral">0.3%</Tag>, '3 tokens', '10× more expensive than VAEA'],
       ['Jupiter Perps', 'Variable', 'SOL/USDC only', 'Perps pool only, not general-purpose'],

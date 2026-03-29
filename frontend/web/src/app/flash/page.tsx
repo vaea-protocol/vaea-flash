@@ -18,7 +18,7 @@ const SYNTH_FEES: Record<string, number> = {
   // Stablecoins via Jupiter (~0.01-0.05% swap) → total ~0.04-0.08%
   PYUSD: 0.04, USDS: 0.04, USD1: 0.05, USDG: 0.05, EURC: 0.08,
   // Majors via Jupiter (~0.05-0.10% swap) → total ~0.08-0.13%
-  TRUMP: 0.10, PENGU: 0.12, VIRTUAL: 0.13,
+  TRUMP: 0.10, PENGU: 0.12,
   // Mid-caps via Jupiter (~0.08-0.15% swap) → total ~0.11-0.18%
   BONK: 0.11, WIF: 0.11, RAY: 0.10, HNT: 0.14, RNDR: 0.13, JITO: 0.09, KMNO: 0.12,
 };
@@ -44,7 +44,7 @@ const COINGECKO_MAP: Record<string, string> = {
   JUP: 'jupiter-exchange-solana', JLP: 'jupiter-perpetuals-liquidity-provider-token',
   cbBTC: 'coinbase-wrapped-btc', mSOL: 'msol', bSOL: 'blazestake-staked-sol',
   INF: 'infinity-by-sanctum', laineSOL: 'lainesol',
-  TRUMP: 'official-trump', VIRTUAL: 'virtual-protocol',
+  TRUMP: 'official-trump',
   PENGU: 'pudgy-penguins', BONK: 'bonk',
   WIF: 'dogwifhat', RAY: 'raydium',
   HNT: 'helium', RNDR: 'render-token',
