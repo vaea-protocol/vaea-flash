@@ -141,7 +141,7 @@ export default function TokenPage() {
           <div style={{ background: 'white', borderRadius: 20, padding: '18px 20px', border: '1px solid var(--border)' }}>
             <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Fee (SDK)</div>
             <div style={{ fontSize: '1.35rem', fontWeight: 900, color: 'var(--emerald)' }}>
-              {capacity ? `${capacity.fee_sdk.total_pct}%` : '—'}
+              {capacity ? `${info?.route === 'synthetic' ? '~' : ''}${capacity.fee_sdk.total_pct.toFixed(2)}%` : '—'}
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: 2 }}>
               {info?.route === 'direct' ? 'No swap cost' : 'Includes swap'}
@@ -300,7 +300,7 @@ export default function TokenPage() {
                   { n: '1', label: `begin_flash()`, desc: `Register ${symbol} loan on-chain` },
                   { n: '2', label: info?.route === 'direct' ? `Borrow from ${capacity?.source_protocol?.replace('_', ' ') || 'lending protocol'}` : `Borrow SOL → swap to ${symbol}`, desc: info?.route === 'direct' ? 'Direct pool withdrawal' : `Via ${capacity?.swap_protocol || 'Sanctum/Jupiter'}` },
                   { n: '3', label: 'Your logic executes', desc: 'Arb, liquidation, swap...' },
-                  { n: '4', label: `end_flash()`, desc: `Repay + ${capacity?.fee_sdk?.total_pct || '0.03'}% fee` },
+                  { n: '4', label: `end_flash()`, desc: `Repay + ~${capacity?.fee_sdk?.total_pct?.toFixed(2) || '0.03'}% fee` },
                 ].map(s => (
                   <div key={s.n} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                     <div style={{ width: 24, height: 24, borderRadius: '50%', background: `${color}15`, color: color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 900, flexShrink: 0 }}>{s.n}</div>
