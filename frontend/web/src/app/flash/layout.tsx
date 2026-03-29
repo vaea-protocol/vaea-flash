@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Flash Loan Dashboard — All Tokens & Liquidity | VAEA Flash',
-  description: 'Browse all 27+ flash loan tokens available on Solana. Real-time liquidity, fees, and prices for SOL, USDC, JitoSOL, mSOL, BONK, and more. Direct and synthetic routes from 0.03% fee. The most complete flash loan aggregator on Solana.',
+  title: 'Flash Loan Dashboard — All 26 Tokens & Real-Time Liquidity',
+  description: 'Browse all 26 flash loan tokens available on Solana. Real-time liquidity, fees, and prices for SOL, USDC, JitoSOL, mSOL, BONK, and more. Direct and synthetic routes from 0.03% fee. The most complete flash loan aggregator on Solana.',
   keywords: [
     'flash loan dashboard', 'Solana flash loan tokens', 'flash loan liquidity',
     'SOL flash loan', 'USDC flash loan', 'JitoSOL flash loan', 'mSOL flash loan',

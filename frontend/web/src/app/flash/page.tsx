@@ -40,13 +40,13 @@ const FALLBACK_TOKENS: TokenCapacity[] = SUPPORTED_TOKENS.map(t => {
 // CoinGecko IDs for free price API (no key needed)
 const COINGECKO_MAP: Record<string, string> = {
   SOL: 'solana', USDC: 'usd-coin', USDT: 'tether',
-  JitoSOL: 'jito-staked-sol', JupSOL: 'jupSOL',
+  JitoSOL: 'jito-staked-sol', JupSOL: 'jupiter-staked-sol',
   JUP: 'jupiter-exchange-solana', JLP: 'jupiter-perpetuals-liquidity-provider-token',
   cbBTC: 'coinbase-wrapped-btc', mSOL: 'msol', bSOL: 'blazestake-staked-sol',
-  INF: 'infinity-by-sanctum', laineSOL: 'lainesol',
+  INF: 'socean-staked-sol', laineSOL: 'solana', // laineSOL not on CoinGecko, use SOL ~1:1
   TRUMP: 'official-trump',
   PENGU: 'pudgy-penguins', BONK: 'bonk',
-  WIF: 'dogwifhat', RAY: 'raydium',
+  WIF: 'dogwifcoin', RAY: 'raydium',
   HNT: 'helium', RNDR: 'render-token',
   JITO: 'jito-governance-token', KMNO: 'kamino',
   PYUSD: 'paypal-usd', USDS: 'usds',
