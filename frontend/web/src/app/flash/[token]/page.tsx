@@ -314,7 +314,203 @@ export default function TokenPage() {
             </div>
           </div>
         </div>
+
+        {/* ═══ SEO: FAQ Section ═══ */}
+        <div className="fade-in" style={{ marginTop: 48 }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: 20, letterSpacing: '-0.02em' }}>
+            Frequently Asked Questions — {symbol} Flash Loan
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {getFaq(symbol, info?.name || symbol, info?.route || 'direct', capacity).map((faq, i) => (
+              <details key={i} style={{
+                background: 'white', borderRadius: 16, border: '1px solid var(--border)',
+                padding: '0', overflow: 'hidden',
+              }}>
+                <summary style={{
+                  padding: '16px 20px', cursor: 'pointer', fontWeight: 700, fontSize: '0.9rem',
+                  listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                }}>
+                  {faq.q}
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', flexShrink: 0, marginLeft: 12 }}>▼</span>
+                </summary>
+                <div style={{
+                  padding: '0 20px 16px', fontSize: '0.85rem', color: 'var(--text-2)', lineHeight: 1.7,
+                  borderTop: '1px solid var(--border)',
+                }}>
+                  <p style={{ marginTop: 12 }}>{faq.a}</p>
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+
+        {/* ═══ SEO: Related Tags ═══ */}
+        <div style={{ marginTop: 32 }}>
+          <h3 style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
+            Related Topics
+          </h3>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {getTags(symbol, info?.name || symbol, info?.route || 'direct').map(tag => (
+              <span key={tag} style={{
+                padding: '6px 14px', borderRadius: 20, background: 'var(--bg)',
+                fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-2)',
+                border: '1px solid var(--border)',
+              }}>
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* ═══ SEO: Internal Links ═══ */}
+        <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--border)' }}>
+          <h3 style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
+            Other Flash Loan Tokens
+          </h3>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {SUPPORTED_TOKENS.filter(t => t.symbol.toLowerCase() !== symbol.toLowerCase()).slice(0, 12).map(t => (
+              <Link key={t.symbol} href={`/flash/${t.symbol}`} style={{
+                padding: '6px 14px', borderRadius: 20, background: 'white',
+                fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)',
+                border: '1px solid var(--border)', textDecoration: 'none',
+                transition: 'all 0.15s ease',
+              }}>
+                {t.icon} {t.symbol}
+              </Link>
+            ))}
+            <Link href="/flash" style={{
+              padding: '6px 14px', borderRadius: 20, background: 'var(--bg)',
+              fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-2)',
+              border: '1px solid var(--border)', textDecoration: 'none',
+            }}>
+              View all 30 →
+            </Link>
+          </div>
+        </div>
+
+        {/* ═══ JSON-LD: FAQ Structured Data ═══ */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: getFaq(symbol, info?.name || symbol, info?.route || 'direct', capacity).map(faq => ({
+                '@type': 'Question',
+                name: faq.q,
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: faq.a,
+                },
+              })),
+            }),
+          }}
+        />
+
+        {/* ═══ JSON-LD: Product Structured Data ═══ */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FinancialProduct',
+              name: `${symbol} Flash Loan`,
+              description: `Flash loan ${info?.name || symbol} (${symbol}) on Solana with VAEA Flash. ${info?.route === 'direct' ? 'Direct route, from 0.03% fee.' : 'Synthetic route, real-time fees.'}`,
+              provider: {
+                '@type': 'Organization',
+                name: 'VAEA Flash',
+                url: 'https://vaea.fi',
+              },
+              url: `https://vaea.fi/flash/${symbol}`,
+              category: 'Flash Loan',
+            }),
+          }}
+        />
       </div>
     </div>
   );
+}
+
+// ═══════════════════════════════════════════
+//  SEO Helpers
+// ═══════════════════════════════════════════
+
+function getFaq(
+  symbol: string, name: string, route: string,
+  capacity: { fee_sdk?: { total_pct?: number }; max_amount?: number; source_protocol?: string; swap_protocol?: string } | null
+) {
+  const feePct = capacity?.fee_sdk?.total_pct?.toFixed(2) || (route === 'direct' ? '0.03' : '~0.10');
+  const maxAmt = capacity?.max_amount ? `up to ${capacity.max_amount.toLocaleString()} ${symbol}` : `large amounts of ${symbol}`;
+
+  const faqs = [
+    {
+      q: `What is a ${symbol} flash loan?`,
+      a: `A ${symbol} flash loan lets you borrow ${name} (${symbol}) with zero collateral in a single Solana transaction. You receive the full amount, execute your strategy (arbitrage, liquidation, collateral swap), and repay — all atomically. If repayment fails, the entire transaction reverts.`,
+    },
+    {
+      q: `How much does a ${symbol} flash loan cost?`,
+      a: `The current fee for a ${symbol} flash loan is ${feePct}%. ${route === 'direct' ? `This is the flat VAEA protocol fee — no swap costs since ${symbol} is borrowed directly from lending protocols.` : `This includes the VAEA protocol fee (0.03%) plus the real-time swap cost calculated from Jupiter. Fees update every ~60 seconds based on actual market liquidity.`}`,
+    },
+    {
+      q: `How much ${symbol} can I borrow?`,
+      a: `You can currently borrow ${maxAmt}. Available liquidity is pulled from ${capacity?.source_protocol?.replace('_', ' ') || 'Solana lending protocols'} and updated every 10 seconds. Check the dashboard for real-time availability.`,
+    },
+    {
+      q: `What is the difference between direct and synthetic flash loans?`,
+      a: `Direct flash loans borrow tokens directly from lending protocols (Marginfi, Kamino, Save) at a fixed 0.03% fee. Synthetic flash loans borrow a base token (SOL/USDC) and swap to your target token via Sanctum or Jupiter, with fees that vary based on market liquidity.`,
+    },
+  ];
+
+  if (route === 'direct') {
+    faqs.push({
+      q: `Why is ${symbol} a direct route token?`,
+      a: `${name} has deep liquidity in Solana lending protocols like Marginfi and Kamino, so VAEA can borrow it directly without going through a swap. This gives you the lowest possible fee (0.03%) and fastest execution.`,
+    });
+  } else {
+    faqs.push({
+      q: `How does the synthetic route work for ${symbol}?`,
+      a: `VAEA borrows SOL or USDC from a lending protocol, then swaps to ${symbol} via ${capacity?.swap_protocol || 'Jupiter/Sanctum'}. After your logic runs, it swaps back and repays — all in one transaction. The swap cost is calculated in real-time using the Price-vs-Quote method.`,
+    });
+  }
+
+  faqs.push(
+    {
+      q: `Which SDKs support ${symbol} flash loans?`,
+      a: `VAEA Flash supports ${symbol} in all three SDKs: TypeScript (npm i @vaea/flash), Rust (cargo add vaea-flash-sdk), and Python (pip install vaea-flash). All SDKs include simulation, fee estimation, and execute functions.`,
+    },
+    {
+      q: `Is it safe to use ${symbol} flash loans?`,
+      a: `Yes. Flash loans are atomic — the entire transaction succeeds or reverts. You never lose funds because if the repayment fails, Solana rolls back everything. VAEA's on-chain program verifies repayment before the transaction finalizes.`,
+    },
+  );
+
+  return faqs;
+}
+
+function getTags(symbol: string, name: string, route: string): string[] {
+  const base = [
+    `${symbol} flash loan`,
+    `borrow ${symbol} Solana`,
+    `${name} DeFi`,
+    'Solana flash loan',
+    'atomic transaction',
+    'no collateral',
+    'VAEA Flash',
+    'flash loan SDK',
+  ];
+
+  if (route === 'direct') {
+    base.push('direct route', 'Marginfi', 'Kamino', '0.03% fee');
+  } else {
+    base.push('synthetic route', 'Jupiter swap', 'real-time fees', `swap ${symbol}`);
+  }
+
+  base.push(
+    'arbitrage bot',
+    'liquidation bot',
+    'DeFi automation',
+    `${symbol} price`,
+  );
+
+  return base;
 }
