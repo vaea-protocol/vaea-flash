@@ -11,17 +11,31 @@ import { API_URL } from '@/lib/api';
 const HeroScene = dynamic(() => import('@/components/three/HeroOrb'), { ssr: false });
 
 const PALLETTE = ['#29C1A2', '#FF718F', '#823FFF', '#FF9060', '#8ECAE6', '#29C1A2', '#FF718F', '#823FFF'];
+// Realistic fee estimates per swap provider (VAEA 3bps + swap fee)
+const SYNTH_FEES: Record<string, number> = {
+  // LSTs via Sanctum (~0.03% swap) → total ~0.06%
+  mSOL: 0.06, bSOL: 0.06, INF: 0.06, laineSOL: 0.06,
+  // Stablecoins via Jupiter (~0.01-0.05% swap) → total ~0.04-0.08%
+  PYUSD: 0.04, USDS: 0.04, USD1: 0.05, USDG: 0.05, EURC: 0.08,
+  // Majors via Jupiter (~0.05-0.10% swap) → total ~0.08-0.13%
+  TRUMP: 0.10, PENGU: 0.12, VIRTUAL: 0.13,
+  // Mid-caps via Jupiter (~0.08-0.15% swap) → total ~0.11-0.18%
+  BONK: 0.11, WIF: 0.11, RAY: 0.10, HNT: 0.14, RNDR: 0.13, JITO: 0.09, KMNO: 0.12,
+};
 
-const FALLBACK_TOKENS: TokenCapacity[] = SUPPORTED_TOKENS.map(t => ({
-  symbol: t.symbol, mint: '', name: t.name, decimals: t.decimals,
-  route_type: t.route === 'direct' ? 'direct' as const : 'synthetic' as const,
-  source_protocol: t.route === 'direct' ? 'marginfi' : 'marginfi',
-  swap_protocol: t.route === 'synthetic' ? (['mSOL','bSOL','INF','laineSOL'].includes(t.symbol) ? 'sanctum' : 'jupiter') : undefined,
-  max_amount: 0, max_amount_usd: 0,
-  fee_sdk: { bps: 3, pct: 0.03, total_pct: t.route === 'direct' ? 0.03 : 0.09 },
-  fee_ui: { bps: 5, pct: 0.05, total_pct: t.route === 'direct' ? 0.05 : 0.15 },
-  status: 'available' as const, updated_at: Date.now()/1000,
-}));
+const FALLBACK_TOKENS: TokenCapacity[] = SUPPORTED_TOKENS.map(t => {
+  const totalPct = t.route === 'direct' ? 0.03 : (SYNTH_FEES[t.symbol] ?? 0.10);
+  return {
+    symbol: t.symbol, mint: '', name: t.name, decimals: t.decimals,
+    route_type: t.route === 'direct' ? 'direct' as const : 'synthetic' as const,
+    source_protocol: t.route === 'direct' ? 'marginfi' : 'marginfi',
+    swap_protocol: t.route === 'synthetic' ? (['mSOL','bSOL','INF','laineSOL'].includes(t.symbol) ? 'sanctum' : 'jupiter') : undefined,
+    max_amount: 0, max_amount_usd: 0,
+    fee_sdk: { bps: 3, pct: 0.03, total_pct: totalPct },
+    fee_ui: { bps: 5, pct: 0.05, total_pct: totalPct + 0.02 },
+    status: 'available' as const, updated_at: Date.now()/1000,
+  };
+});
 
 // CoinGecko IDs for free price API (no key needed)
 const COINGECKO_MAP: Record<string, string> = {
@@ -178,7 +192,7 @@ export default function FlashDashboard() {
                       </div>
                     ) : null}
                   </td>
-                  <td><span className="tag tag-emerald">{formatPct(t.fee_sdk.total_pct)}</span></td>
+                  <td><span className="tag tag-emerald">{t.route_type === 'synthetic' ? '~' : ''}{formatPct(t.fee_sdk.total_pct)}</span></td>
                   <td>
                     <span className={`tag ${t.route_type === 'direct' ? 'tag-emerald' : 'tag-purple'}`}>{t.route_type}</span>
                   </td>
@@ -210,7 +224,7 @@ export default function FlashDashboard() {
                   <div style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>{t.name}</div>
                 </div>
                 <div className="token-card-m-right">
-                  <span className="tag tag-emerald">{formatPct(t.fee_sdk.total_pct)}</span>
+                  <span className="tag tag-emerald">{t.route_type === 'synthetic' ? '~' : ''}{formatPct(t.fee_sdk.total_pct)}</span>
                   <span className={`tag ${t.route_type === 'direct' ? 'tag-emerald' : 'tag-purple'}`} style={{ fontSize: '0.62rem' }}>{t.route_type}</span>
                 </div>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
