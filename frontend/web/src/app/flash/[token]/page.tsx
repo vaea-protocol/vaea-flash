@@ -368,14 +368,16 @@ export default function TokenPage() {
             Other Flash Loan Tokens
           </h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {SUPPORTED_TOKENS.filter(t => t.symbol.toLowerCase() !== symbol.toLowerCase()).slice(0, 12).map(t => (
+            {SUPPORTED_TOKENS.filter(t => t.symbol.toLowerCase() !== symbol.toLowerCase()).slice(0, 12).map((t, i) => (
               <Link key={t.symbol} href={`/flash/${t.symbol}`} style={{
-                padding: '6px 14px', borderRadius: 20, background: 'white',
+                padding: '5px 14px 5px 6px', borderRadius: 20, background: 'white',
                 fontSize: '0.78rem', fontWeight: 700, color: 'var(--text)',
                 border: '1px solid var(--border)', textDecoration: 'none',
                 transition: 'all 0.15s ease',
+                display: 'inline-flex', alignItems: 'center', gap: 6,
               }}>
-                {t.icon} {t.symbol}
+                <TokenIcon symbol={t.symbol} size={22} index={i} />
+                {t.symbol}
               </Link>
             ))}
             <Link href="/flash" style={{
