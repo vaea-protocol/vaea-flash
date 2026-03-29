@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Flash Loan Dashboard — All 26 Tokens & Real-Time Liquidity',
-  description: 'Browse all 26 flash loan tokens available on Solana. Real-time liquidity, fees, and prices for SOL, USDC, JitoSOL, mSOL, BONK, and more. Direct and synthetic routes from 0.03% fee. The most complete flash loan aggregator on Solana.',
+  title: '30 Flash Loan Tokens — Real-Time Liquidity',
+  description: 'Browse all 30 flash loan tokens on Solana. Live liquidity, fees, and prices for SOL, USDC, wETH, JitoSOL, BONK, WIF, and more. Direct and synthetic routes from 0.03%.',
   keywords: [
     'flash loan dashboard', 'Solana flash loan tokens', 'flash loan liquidity',
     'SOL flash loan', 'USDC flash loan', 'JitoSOL flash loan', 'mSOL flash loan',
@@ -10,8 +10,8 @@ export const metadata: Metadata = {
     'DeFi dashboard', 'flash loan fee comparison', 'Solana DeFi tokens',
   ],
   openGraph: {
-    title: 'Flash Loan Dashboard — VAEA Flash',
-    description: '30+ tokens available for flash loans on Solana. Real-time liquidity and fees.',
+    title: '30 Flash Loan Tokens — VAEA Flash',
+    description: '30 tokens available for flash loans on Solana. Real-time liquidity and fees.',
     type: 'website',
     url: 'https://vaea.fi/flash',
   },

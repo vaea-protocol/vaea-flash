@@ -3,11 +3,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "VAEA Flash — Universal Flash Loans on Solana",
+    default: "VAEA Flash — Solana Flash Loans",
     template: "%s | VAEA Flash",
   },
   description:
-    "Flash loan any SPL token on Solana in a single atomic transaction. 30+ tokens supported including LSTs and mid-caps. From 0.03% fee. SDKs in TypeScript, Rust, and Python.",
+    "Flash loan any SPL token on Solana in one atomic transaction. 30 tokens supported — SOL, USDC, wETH, JitoSOL, BONK, and more. From 0.03% fee. SDKs in TypeScript, Rust, and Python.",
   keywords: [
     "solana flash loan",
     "flash loan",
@@ -29,9 +29,9 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://vaea.fi"),
   alternates: { canonical: "/flash" },
   openGraph: {
-    title: "VAEA Flash — Universal Flash Loans on Solana",
+    title: "VAEA Flash — Solana Flash Loans",
     description:
-      "Flash loan any SPL token on Solana. 30+ tokens, from 0.03% fee, one atomic transaction. The universal flash loan layer for Solana DeFi.",
+      "Flash loan 30 tokens on Solana from 0.03% fee. SOL, USDC, wETH, JitoSOL, BONK and more. One atomic transaction.",
     siteName: "VAEA Flash",
     type: "website",
     url: "https://vaea.fi/flash",
@@ -39,9 +39,9 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "VAEA Flash — Universal Flash Loans on Solana",
+        width: 1024,
+        height: 1024,
+        alt: "VAEA Flash — Solana Flash Loans",
       },
     ],
   },
