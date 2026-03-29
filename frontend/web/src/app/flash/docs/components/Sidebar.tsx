@@ -10,7 +10,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <aside className="docs-no-scrollbar" style={{
       width: 260, flexShrink: 0, height: '100%',
-      borderRight: '1px solid var(--border)', background: 'white',
+      borderRight: '1px solid var(--border)', background: 'var(--bg)',
       overflowY: 'auto', display: 'flex', flexDirection: 'column',
     }}>
 
@@ -43,14 +43,14 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                   style={{
                     display: 'flex', alignItems: 'center', gap: 8, width: '100%',
                     padding: '8px 20px', border: 'none', cursor: 'pointer',
-                    background: isActive ? 'var(--vaea-accent-light)' : 'transparent',
+                    background: isActive ? 'white' : 'transparent',
                     borderRight: isActive ? '2.5px solid var(--emerald)' : '2.5px solid transparent',
                     fontSize: '0.82rem', fontWeight: isActive ? 700 : 500,
                     color: isActive ? 'var(--text)' : 'var(--text-2)',
                     fontFamily: 'Outfit, sans-serif', borderRadius: 0,
                     transition: 'all 0.15s ease', textAlign: 'left',
                   }}
-                  onMouseEnter={e => { if (!isActive) (e.currentTarget.style.background = 'var(--bg)'); }}
+                  onMouseEnter={e => { if (!isActive) (e.currentTarget.style.background = 'rgba(255,255,255,0.6)'); }}
                   onMouseLeave={e => { if (!isActive) (e.currentTarget.style.background = 'transparent'); }}
                 >
                   <span style={{ fontSize: '0.78rem', width: 20, textAlign: 'center' }}>{page.icon}</span>
