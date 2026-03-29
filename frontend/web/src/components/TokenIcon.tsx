@@ -14,7 +14,6 @@ const ICON_MAP: Record<string, string> = {
   INF: '/tokens/infSOL.png',
   laineSOL: '/tokens/lainesol.webp',
   TRUMP: '/tokens/s_trump.webp',
-  VIRTUAL: '/tokens/s_virtual.webp',
   PENGU: '/tokens/s_pengu.webp',
   BONK: '/tokens/s_bonk.webp',
   WIF: '/tokens/s_wif.webp',
@@ -28,6 +27,10 @@ const ICON_MAP: Record<string, string> = {
   USD1: '/tokens/s_usd1.webp',
   USDG: '/tokens/s_usdg.webp',
   EURC: '/tokens/s_eurc.webp',
+  wETH: '/tokens/s_weth.png',
+  PYTH: '/tokens/s_pyth.png',
+  W: '/tokens/s_w.png',
+  ORCA: '/tokens/s_orca.png',
 };
 
 const FALLBACK_COLORS = [
